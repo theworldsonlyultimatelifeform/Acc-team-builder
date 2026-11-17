@@ -218,6 +218,7 @@ h1,h2,.disp{font-family:Rubik,system-ui,sans-serif;font-weight:800}
 }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,700;0,800;1,800&display=swap">
+<script src="refs.js"></script>
 </head>
 <body>
 <header>
@@ -1269,6 +1270,14 @@ function describe(src,sx,sy,sw,sh){
 }
 function vec(u){const n=u.length;let m=0;for(let i=0;i<n;i++)m+=u[i];m/=n;const v=new Float32Array(n);let s=0;for(let i=0;i<n;i++){v[i]=u[i]-m;s+=v[i]*v[i];}const sd=Math.sqrt(s/n),k=Math.sqrt(s)||1;for(let i=0;i<n;i++)v[i]/=k;return {v,sd};}
 function sim(a,b){let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s;}
+// Built-in references (refs.js): 12x12 fingerprint of the upper-middle art, so card badges and name labels don't interfere
+const BREG=[.2,.8,.25,.6],BD=12;
+const bw=document.createElement('canvas');bw.width=bw.height=48;const bwX=bw.getContext('2d',{willReadFrequently:true});
+const bt=document.createElement('canvas');bt.width=bt.height=BD;const btX=bt.getContext('2d',{willReadFrequently:true});
+function fp2(src,sx,sy,sw,sh){const x=sx+sw*BREG[0],y=sy+sh*BREG[2],w=sw*(BREG[1]-BREG[0]),h=sh*(BREG[3]-BREG[2]);bwX.imageSmoothingQuality='high';bwX.clearRect(0,0,48,48);bwX.drawImage(src,x,y,w,h,0,0,48,48);btX.imageSmoothingQuality='high';btX.clearRect(0,0,BD,BD);btX.drawImage(bw,0,0,48,48,0,0,BD,BD);const p=btX.getImageData(0,0,BD,BD).data,u=new Uint8Array(BD*BD*3);for(let i=0,j=0;i<p.length;i+=4){u[j++]=p[i];u[j++]=p[i+1];u[j++]=p[i+2];}return vec(u).v;}
+let _B=null;
+function BUILTIN(){if(_B)return _B;_B=[];(window.BUILTIN_REFS||[]).forEach(([n,sk,d])=>{const dd=DB.find(x=>x.n===n&&x.kind==='atk')||DB.find(x=>x.kind==='atk'&&norm(x.n)===norm(n));if(dd)_B.push({d:dd,skin:sk,v:vec(unb64(d)).v});});return _B;}
+function builtinBest(src,a,b,w,h,best){const B=BUILTIN();if(!B.length)return;const qs=[];for(const dx of [-.04,0,.04])for(const dy of [-.04,0,.04])qs.push(fp2(src,a+dx*w,b+dy*h,w,h));B.forEach(r=>{let s=-1;for(const q of qs){const t=sim(q,r.v);if(t>s)s=t;}s=Math.min(1,Math.max(0,(s-.6)/.35));const k=r.d.n+'|'+r.d.kind+'|'+r.skin;if(!best[k]||s>best[k].s)best[k]={d:r.d,skin:r.skin,s};});}
 function thumbOf(src,sx,sy,sw,sh,W,H){const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,sx,sy,sw,sh,0,0,W,H);return c.toDataURL('image/jpeg',.75);}
 function loadImg(src){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=typeof src==='string'?src:URL.createObjectURL(src);});}
 function cardFromName(s){
@@ -1342,6 +1351,7 @@ $('#detectBtn').onclick=async()=>{
         const u=describe(sh.cv,a,b,w,h),q=vec(u);if(q.sd<10)return; // empty slot
         const best={};
         R.forEach(r=>{const s=sim(q.v,r.v),k=r.d.n+'|'+r.d.kind+'|'+r.skin;if(!best[k]||s>best[k].s)best[k]={d:r.d,skin:r.skin,s};});
+        builtinBest(sh.cv,a,b,w,h,best);
         const top=Object.values(best).sort((p,o)=>o.s-p.s).slice(0,5);
         items.push({u,top,thumb:thumbOf(sh.cv,a,b,w,h,90,123),variant:rarityGuess(x,a,b,w,h)});
       });});
@@ -1364,7 +1374,7 @@ function pick(row){
 function renderReview(){
   const box=$('#reviewBox'),it=scanResults||[];
   if(!it.length){box.innerHTML='<div class="card empty">No cards found. Adjust the grid so each box covers one card, then try again.</div>';return;}
-  const noRefs=!refs.length&&!state.owned.some(e=>e.img);
+  const noRefs=!refs.length&&!state.owned.some(e=>e.img)&&!BUILTIN().length;
   let h=`<div class="card"><h3>Found ${it.length} card${it.length===1?'':'s'}</h3><p class="mut" style="margin:0">Check each one. Fix wrong names or versions and untick anything you don’t want, then add them.</p>${noRefs?'<p class="note" style="color:var(--gold)">There are no reference pictures yet, so the scanner can’t name cards. Pick each card below, or add reference pictures first at the bottom of this page.</p>':''}</div><div class="list">`;
   it.forEach((r,i)=>{
     const t=r.top[0],keep=t&&pctOf(t.s)>=65;
@@ -1419,6 +1429,7 @@ function renderRefs(){
   const shown=refs.map((r,i)=>[r,i]).filter(([r])=>!q||norm(r.name+' '+r.skin).includes(q)).sort((a,b)=>a[0].name.localeCompare(b[0].name));
   $('#refList').innerHTML=shown.length?shown.map(([r,i])=>`<div class="item">${r.th?`<img class="pic" src="${r.th}" alt="">`:''}<div class="nm"><b>${esc(r.name)}</b><small>${r.skin&&r.skin!=='base'?esc(r.skin)+' skin':'Base art'}</small></div><button class="btn danger" data-rm="${i}">Remove</button></div>`).join(''):(refs.length?'<div class="empty">No pictures match.</div>':'');
   $('#refList').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{refs.splice(+b.dataset.rm,1);saveRefs();renderRefs();});
+  const nb=BUILTIN().length;if(nb)$('#refCount').textContent=`Built in: ${nb} skin pictures (${new Set(BUILTIN().map(r=>r.d.n)).size} cards). `+$('#refCount').textContent.replace('No reference pictures yet. Add them at the bottom of this page so the scanner can name cards.','');
 }
 $('#refBtn').onclick=()=>$('#refIn').click();
 $('#refIn').onchange=async ev=>{

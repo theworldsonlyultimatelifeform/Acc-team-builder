@@ -922,6 +922,8 @@ function tags(e){const d=findDb(e);return (d&&d.g)||[];}
 const BO=A.filter(c=>c.bo);
 function isBO(e){const d=findDb(e);return !!(d&&d.bo);}
 // ---------- RANKED ----------
+// Players are assumed to own every obtainable support card
+function supPool(){return DB.filter(d=>d.kind==='sup'&&!d.u).map((d,i)=>({id:'sup'+i,name:d.n,kind:'sup',variant:'Basic',trait:'None'}));}
 function allPool(){return DB.filter(d=>!d.bo&&!d.u&&(d.kind==='sup'||d.dmg>0||TIER_MULT[d.t])).map((d,i)=>{const o=state.owned.find(x=>x.name===d.n&&x.kind===d.kind);return {id:'all'+i,name:d.n,kind:d.kind,variant:'Basic',trait:'None',img:o&&o.img};});}
 function pool(){return state.src==='all'?allPool():state.owned;}
 function pickSrc(s){state.src=s;save();renderTeams();}
@@ -1191,7 +1193,7 @@ function buildTeam(mode,used){
   const n=state.size;
   const okA=e=>!(mode.ban||[]).includes(e.name)&&!(mode.noLimited&&isLimited(e));const sc=e=>mode.scaled?scaledScore(e):atkScore(e);
   const atks=uniq(pool().filter(e=>e.kind==='atk'&&!used.has(e.id)&&!isBO(e)&&okA(e)).sort((a,b)=>sc(b)-sc(a)),mode.ranked).slice(0,n);
-  const sups=uniq(pool().filter(e=>e.kind==='sup'&&!used.has(e.id)&&supScore(e,mode)>0).sort((a,b)=>supScore(b,mode)-supScore(a,mode)),mode.ranked).slice(0,atks.length);
+  const sups=uniq(supPool().filter(e=>e.kind==='sup'&&!used.has(e.id)&&supScore(e,mode)>0).sort((a,b)=>supScore(b,mode)-supScore(a,mode)),mode.ranked).slice(0,atks.length);
   const fall=sups.filter(s=>tags(s).includes('fall')),surv=sups.filter(s=>tags(s).includes('surv')&&!fall.includes(s)),rest=sups.filter(s=>!surv.includes(s)&&!fall.includes(s));
   // Top card goes first. Supports that trigger when their card falls go on weaker cards (never the carry),
   // and those cards move to the top so the cards after them get the boost.
@@ -1238,7 +1240,6 @@ function renderTeams(){
     if(t.slots.length<state.size) html+=`<p class="note">Only ${t.slots.length} attacker${t.slots.length===1?'':'s'} available for this team.</p>`;
     html+=`<button class="btn whyBtn" onclick="const c=this.closest('.team');c.classList.toggle('showWhy');this.textContent=c.classList.contains('showWhy')?'Hide reasons':'Why this team?'">Why this team?</button></div>`;
   });
-  if(!nS) html+='<p class="note">Tip: add your support cards too. They make a big difference.</p>';
   out.innerHTML=html;
 }
 function renderSize(){

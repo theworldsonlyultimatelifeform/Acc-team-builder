@@ -188,6 +188,34 @@ h1,h2,.disp{font-family:Rubik,system-ui,sans-serif;font-weight:800}
 .stickyAdd .btn{width:100%;height:50px;font-size:15px;box-shadow:0 6px 20px #0009}
 .item[data-card]{cursor:pointer}
 @media (min-width:700px){.quick{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* ---------- desktop: top bar, wider layout ---------- */
+@media (min-width:900px){
+ header{position:sticky;top:0;z-index:14;height:68px;box-sizing:border-box;padding:0 max(24px,calc((100vw - 1100px)/2 + 24px));align-items:center;background:rgba(15,13,23,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+ header .sub{display:none} header h1{font-size:20px}
+ .acct{margin-top:0}
+ nav.bnav{top:0;bottom:auto;left:50%;right:auto;transform:translateX(-50%);height:68px;padding:0;display:flex;align-items:center;gap:4px;background:transparent;border:0;backdrop-filter:none;z-index:16}
+ nav.bnav button{flex-direction:row;gap:8px;min-height:44px;padding:0 14px;border-radius:10px;font-size:14px}
+ nav.bnav button svg{width:18px;height:18px}
+ nav.bnav button.on{background:#2a2142}
+ nav.bnav button:hover{color:var(--text)}
+ main{max-width:1100px;padding:24px 24px 60px}
+ footer.privacy{max-width:1100px;padding:0 24px 40px;box-sizing:border-box}
+ .toast{bottom:24px}.signPrompt{bottom:24px}
+ .fab{bottom:24px;right:max(24px,calc((100vw - 1100px)/2 + 24px))}
+ .stickyAdd{position:static;max-width:none;margin-top:16px}.stickyAdd .btn{box-shadow:none}
+ .cgrid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:16px 14px}
+ #dbList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .grp .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ #teams{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+ #teams>:not(.card){grid-column:1/-1}
+ #teams>.card{margin-bottom:0}
+ .cCols{display:grid;grid-template-columns:340px minmax(0,1fr);gap:8px 32px;align-items:start}
+ .cRight>h2:first-child,.cRight>.ab:first-child{margin-top:0}
+ .cHero{flex-direction:column;align-items:flex-start}
+ .cHero .ctile{width:200px}
+ .cHero .ctile .art{font-size:48px}
+ .cardSpacer{display:none}
+}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,700;0,800;1,800&display=swap">
 </head>
@@ -984,17 +1012,21 @@ function renderCard(){
   const skins=(typeof refs!=='undefined'?refs:[]).filter(r=>r.name===d.n&&r.kind===d.kind&&r.th);
   const where=d.grp&&d.grp!==G.NONE?d.grp+(d.p?' · '+d.p:''):'';
   let h=`<button class="backBtn" data-go="${prevTab}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Back</button>`;
+  h+='<div class="cCols"><div class="cLeft">';
   h+=`<div class="cHero"><span class="ctile ${frame==='sup'?'sup':'b-'+frame}"><span class="art">${artFor(d,best)}</span></span><div style="min-width:0">${tierBadge(d)}<span class="kindTag ${atk?'atk':'sup'}">${atk?'Attack':'Support'}</span><h1>${esc(d.n)}</h1>${d.a?`<div class="mut">${esc(atk?d.a:'Also called '+d.a)}</div>`:''}${owned.length?`<div class="note" style="color:var(--good);margin-top:4px">You own ${owned.length}</div>`:''}</div></div>`;
   if(atk){
     h+=`<div class="segs" role="tablist" aria-label="Version">${VARIANTS.map(v=>`<button class="seg ${v===cardV?'on':''}" role="tab" aria-selected="${v===cardV}" onclick="cardV='${v}';renderCard()">${v}</button>`).join('')}</div>`;
     h+=d.dmg?`<div class="statGrid"><div><small>Damage (${cardV})</small><b>${fmt(d.dmg*m)}</b></div><div><small>Health (${cardV})</small><b>${fmt(d.dmg*2*m)}</b></div></div>`:'<p class="note">Stats for this card haven’t been added yet.</p>';
   }
+  if(!d.bo)h+=`<div class="stickyAdd"><button class="btn pri" id="cardAdd">${owned.length?'Add another copy':'Add to my cards'}</button></div>`;
+  h+='</div><div class="cRight">';
   h+=(d.an||d.d)?`<div class="ab">${d.an?`<b>${esc(d.an)}</b>`:''}${d.d?esc(d.d):'<span class="mut">Ability text not added yet.</span>'}</div>`:'<div class="ab"><span class="mut">Ability not added yet.</span></div>';
   h+=`<h2>Skins</h2>`+(skins.length?`<div class="skinRow">${skins.map(r=>`<figure><img src="${r.th}" alt="${esc(d.n)} ${esc(r.skin||'base')}"><figcaption>${r.skin&&r.skin!=='base'?esc(r.skin):'Base'}</figcaption></figure>`).join('')}</div>`:'<p class="mut" style="margin:0">No skin pictures added yet.</p>');
   if(where)h+=`<div class="src" style="display:block;margin-top:14px;padding:10px 12px;font-size:13px">How to get: ${esc(where)}</div>`;
   h+=boInfo(d);
   if(owned.length){const tw=teamsWith(d);h+=`<h2>Used in your teams</h2>`+(tw.length?`<div class="list">${tw.map(x=>`<button class="mrow" data-mode="${x.m.id}"><span class="dot" style="background:${MODE_COLOR[x.m.id]||'#a879ff'}"></span><span class="nm">${esc(x.m.name)} · card ${x.i+1}</span></button>`).join('')}</div>`:'<p class="mut" style="margin:0">Not in any of your current teams.</p>');}
-  if(!d.bo)h+=`<div style="height:64px"></div><div class="stickyAdd"><button class="btn pri" id="cardAdd">${owned.length?'Add another copy':'Add to my cards'}</button></div>`;
+  h+='</div></div>';
+  if(!d.bo)h+='<div class="cardSpacer" style="height:64px"></div>';
   box.innerHTML=h;
   if($('#cardAdd'))$('#cardAdd').onclick=()=>openSheet({mode:'add',d});
 }

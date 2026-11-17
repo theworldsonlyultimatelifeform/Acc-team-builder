@@ -122,7 +122,74 @@ input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--acc)}
 .di .s{color:#9ee6a8;font-size:13px;margin-top:3px}
 .di .why{color:var(--mut);font-size:12px;margin-top:2px}
 .orderNote{font-size:12px;color:var(--mut);margin:8px 0 0}
+/* ---------- layout v2: bottom tab bar, home, grid, wiki card page ---------- */
+nav.tabs{display:none}
+main{padding-bottom:110px}
+footer.privacy{padding-bottom:100px}
+.toast{bottom:156px;z-index:30}
+.signPrompt{bottom:92px}
+nav.bnav{position:fixed;left:0;right:0;bottom:0;z-index:15;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:6px 6px calc(10px + env(safe-area-inset-bottom));background:rgba(21,18,33,.97);backdrop-filter:blur(6px);border-top:1px solid var(--line)}
+nav.bnav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;border:0;background:transparent;color:var(--mut);font-size:11px;font-weight:600}
+nav.bnav button.on{color:#c9b3ff}
+nav.bnav button.on svg{stroke-width:2.4}
+h1,h2,.disp{font-family:Rubik,system-ui,sans-serif;font-weight:800}
+.search{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);color:var(--mut)}
+.search input{flex:1;border:0;background:transparent;padding:0;height:46px;outline:none}
+.quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 6px}
+.qa{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:14px;min-height:100px;border-radius:14px;background:var(--panel);border:1px solid var(--line);color:var(--text);text-align:left}
+.qa .qi{width:34px;height:34px;border-radius:10px;background:#2a2142;display:flex;align-items:center;justify-content:center;color:#c9b3ff}
+.qa b{font-size:15px}.qa small{font-size:12px;color:var(--mut)}
+.secHd{display:flex;align-items:baseline;gap:8px}.secHd h2{flex:1}
+.linkBtn{border:0;background:transparent;color:#c9b3ff;font-weight:600;font-size:13px;padding:8px 0}
+.hscroll{display:flex;gap:10px;overflow-x:auto;padding:6px 2px 8px;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.mcard{flex:none;width:78px;display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:transparent;color:var(--text);padding:0}
+.mcard .ctile{width:72px}
+.mrow{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--line);color:var(--text);text-align:left;font-weight:600;font-size:15px}
+.mrow .dot{width:10px;height:10px;border-radius:50%;flex:none}.mrow .nm{flex:1}
+.ctile{position:relative;display:block;width:100%;aspect-ratio:1;border-radius:12px;padding:3px;border:0;background:#8a86a0;box-sizing:border-box}
+.ctile.b-Gold{background:linear-gradient(135deg,#ffe27a,#c9921a)}
+.ctile.b-Rainbow{background:linear-gradient(135deg,#ff5c8a,#ffb443,#5fd39a,#5bb8ff,#a879ff)}
+.ctile.b-Secret{background:linear-gradient(135deg,#fff,#222 40%,#fff 60%,#000)}
+.ctile.sup{background:#3fbf5a}
+.ctile .art{width:100%;height:100%;border-radius:9px;overflow:hidden;background:#231f33;display:flex;align-items:center;justify-content:center;font-family:Rubik,system-ui,sans-serif;font-weight:800;color:#cfc8e8;font-size:17px}
+.ctile .art img{width:100%;height:100%;object-fit:cover;display:block}
+.ctile .cap{position:absolute;left:3px;right:3px;bottom:3px;text-align:center;font-size:10px;font-weight:800;color:#fff;background:linear-gradient(transparent,#000d);border-radius:0 0 9px 9px;padding:8px 0 2px;text-shadow:0 1px 1px #000}
+.ctile .tbadge{position:absolute;top:-6px;right:-6px;padding:1px 6px;border-radius:6px;background:#140b26;border:1px solid #ff5c8a;color:#ff8fb0;font-size:10px;font-weight:800}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:12px 10px}
+.cell{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+.cn{font-size:11px;color:#cfc8e8;text-align:center;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.secLbl{font-family:Rubik,system-ui,sans-serif;font-style:italic;font-weight:800;font-size:14px;letter-spacing:.3px;margin:16px 2px 8px;text-transform:uppercase}
+.secLbl.atk{color:#ff8a8a}.secLbl.sup{color:#7ee08f}.secLbl span{color:var(--mut);font-style:normal;font-weight:600;font-size:12px;margin-left:4px}
+.fab{position:fixed;right:16px;bottom:92px;z-index:14;display:flex;gap:10px}
+.fab button{height:48px;padding:0 18px;border-radius:999px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;border:1px solid var(--acc);background:var(--panel2);color:var(--text);box-shadow:0 6px 20px #0009}
+.fab button.pri{background:var(--acc);color:#140b26}
+.segs{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--panel);border:1px solid var(--line);overflow-x:auto;scrollbar-width:none;margin:0 0 10px}
+.segs::-webkit-scrollbar{display:none}
+.seg{flex:none;height:38px;padding:0 13px;border-radius:9px;border:0;background:transparent;color:var(--mut);font-weight:700;font-size:13px}
+.seg.on{background:var(--acc);color:#140b26}
+.team .why:not(.keep){display:none}.team.showWhy .why{display:block}
+.whyBtn{width:100%;margin-top:10px}
+.backBtn{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:#c9b3ff;font-weight:600;font-size:14px;padding:6px 0}
+.cHero{display:flex;gap:14px;align-items:center;margin:6px 0 14px}
+.cHero .ctile{width:124px;flex:none;border-radius:18px;padding:4px}
+.cHero .ctile .art{border-radius:14px;font-size:32px}
+.cHero h1{font-size:26px;line-height:1.1;margin:4px 0}
+.kindTag{display:inline-block;padding:2px 8px;border-radius:7px;font-size:12px;font-weight:700;margin-left:4px}
+.kindTag.atk{background:#3a1420;color:#ff8fb0}.kindTag.sup{background:#143a20;color:#8fe0a0}
+.statGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0}
+.statGrid div{padding:12px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.statGrid small{display:block;font-size:12px;color:var(--mut)}.statGrid b{font-family:Rubik,system-ui,sans-serif;font-size:22px}
+.skinRow{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.skinRow figure{margin:0;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px}
+.skinRow img{width:64px;height:64px;border-radius:11px;object-fit:cover;border:2px solid var(--line)}
+.skinRow figcaption{font-size:11px;color:#cfc8e8}
+.stickyAdd{position:fixed;left:16px;right:16px;bottom:88px;z-index:14;max-width:728px;margin:0 auto}
+.stickyAdd .btn{width:100%;height:50px;font-size:15px;box-shadow:0 6px 20px #0009}
+.item[data-card]{cursor:pointer}
+@media (min-width:700px){.quick{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,700;0,800;1,800&display=swap">
 </head>
 <body>
 <header>
@@ -130,22 +197,32 @@ input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--acc)}
   <p class="sub">Fan-made deck helper for Anime Card Clash on Roblox</p></div>
   <div class="acct" id="acct"></div>
 </header>
-<nav class="tabs">
-  <button data-tab="add">Add cards</button>
-  <button data-tab="scan">Scan</button>
-  <button data-tab="mine">My cards</button>
-  <button data-tab="teams">Teams</button>
-  <button data-tab="where">Where to get</button>
-</nav>
+<nav class="bnav" aria-label="Main"><button data-tab="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg><span>Home</span></button><button data-tab="mine"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"></path></svg><span>My cards</span></button><button data-tab="scan"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"></path></svg><span>Scan</span></button><button data-tab="teams"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5"></path></svg><span>Teams</span></button><button data-tab="add"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5"></path></svg><span>Wiki</span></button></nav>
 <main>
+  <section id="tab-home">
+    <form id="homeForm" class="search" role="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><input id="homeQ" type="search" placeholder="Search any card or character" aria-label="Search cards" autocomplete="off" enterkeyhint="search"></form>
+    <div class="quick">
+      <button class="qa" data-go="scan"><span class="qi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"></path></svg></span><b>Scan inventory</b><small>Add cards from screenshots</small></button>
+      <button class="qa" data-go="mine"><span class="qi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"></path></svg></span><b>My cards</b><small id="homeCount"></small></button>
+      <button class="qa" data-go="teams"><span class="qi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5"></path></svg></span><b>Build my teams</b><small>For every game mode</small></button>
+      <button class="qa" data-go="add"><span class="qi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5"></path></svg></span><b>Card wiki</b><small>Every card, old ones too</small></button>
+    </div>
+    <div class="secHd"><h2>Top meta cards</h2><button class="linkBtn" data-go="add">See all</button></div>
+    <div class="hscroll" id="homeMeta"></div>
+    <h2>Best teams by mode</h2>
+    <div class="list" id="homeModes"></div>
+  </section>
+
   <section id="tab-add">
-    <input id="q" type="search" placeholder="Search card or character (e.g. Gojo, Luffy)…" autocomplete="off">
+    <h2 style="margin-top:4px">Card wiki</h2>
+    <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><input id="q" type="search" placeholder="Search card or character (e.g. Gojo, Luffy)…" autocomplete="off" aria-label="Search cards"></label>
     <div class="chips" id="kindChips">
       <button class="chip on" data-k="all">All</button>
       <button class="chip" data-k="atk">Attackers</button>
       <button class="chip" data-k="sup">Supports</button>
+      <button class="chip" data-go="where">By how to get</button>
     </div>
-    <p class="mut" id="dbCount" style="margin:0 2px 8px"></p>
+    <p class="mut" id="dbCount" style="margin:0 2px 8px">Tap a card to see its page, or + to add it.</p>
     <div class="list" id="dbList"></div>
     <div class="card" style="margin-top:12px">
       <h3>Card not on the list?</h3>
@@ -187,8 +264,10 @@ input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--acc)}
   </section>
 
   <section id="tab-mine">
-    <div class="stat"><div><b id="cAtk">0</b><span class="mut">Attackers</span></div><div><b id="cSup">0</b><span class="mut">Supports</span></div></div>
-    <div class="list" id="mineList"></div>
+    <div class="secHd"><h2 style="margin-top:4px">My cards</h2><span class="mut" id="mineCount"></span></div>
+    <div class="chips" id="mineChips"></div>
+    <div id="mineList"></div>
+    <div class="fab"><button data-go="scan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"></path></svg>Scan</button><button class="pri" data-go="add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add card</button></div>
     <div class="card" style="margin-top:14px">
       <details>
         <summary>Back up or move your collection</summary>
@@ -201,13 +280,13 @@ input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--acc)}
   </section>
 
   <section id="tab-teams">
+    <h2 style="margin-top:4px">Teams</h2>
+    <div id="teams"></div>
     <div class="card">
       <label class="mut" style="font-weight:600">Attackers per team</label>
       <div class="chips" id="sizeChips"></div>
       <p class="mut" style="margin:0">A normal deck is 4 attackers + 4 supports. Each attacker gets one support.</p>
     </div>
-    <button class="btn pri" id="buildBtn" style="width:100%;padding:14px;font-size:16px">Build my teams</button>
-    <div id="teams" style="margin-top:12px"></div>
     <details class="card">
       <summary>How teams are picked</summary>
       <p class="mut">Each attacker is scored by its real damage for the version you own (Gold is 4× Basic, Rainbow 16×, Secret 64×), plus its trait. Cards ranked on the community tier lists (version 7.2) get a bonus for strong abilities. Where a card's stats haven't been added yet, the site estimates them and marks them “est.”.</p>
@@ -216,9 +295,13 @@ input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--acc)}
   </section>
 
   <section id="tab-where">
+    <h2 style="margin-top:4px">Card wiki</h2>
+    <div class="chips"><button class="chip" data-go="add">All cards</button><button class="chip on">By how to get</button></div>
     <p class="mut" style="margin:0 2px 10px">Every card on the site, grouped by how you get it in the game. Tap a group to open it.</p>
     <div id="whereList"></div>
   </section>
+
+  <section id="tab-card"><div id="cardView"></div></section>
 </main>
 
 <footer class="privacy"><details class="card"><summary>Privacy</summary><p class="mut">You don’t need an account. Without signing in, everything you add stays in your own browser.</p><p class="mut">If you sign in with Google, the site saves your card list and team size to your account so they load on your other devices. Google sign-in is run by Google’s Firebase, which keeps your Google account’s email and ID so you can sign in. Card pictures and scans never leave your device, and nothing is shared or sold. You can delete your saved data at any time with the button below.</p><p class="mut">Fan-made. Not affiliated with Roblox or Anime Card Clash’s developers.</p><button class="btn danger" id="delCloud" style="display:none">Delete my saved cloud data</button></details></footer>
@@ -749,17 +832,21 @@ A.forEach(c=>c.grp=c.g);
 ,['Fear of Future','',['dmg'],'Eye for an Eye','On entry, the supported card signs a contract, sacrificing 30% of its current max HP: it permanently gains damage equal to the HP lost and 35% dodge for 1 turn. Each ally holding this support gets +10% damage.','Chainsaw Man','WORLD','World Boss Event',0]
 ].forEach(([n,t,g,an,d,a,gk,p,u])=>{const o=S.find(x=>x.n===n);const row={n,t,g,an,d,a,kind:'sup',grp:G[gk],p};if(!t)delete row.t;if(u)row.u=1;if(o)Object.assign(o,row);else S.push(row);});
 ['Fear of Future'].forEach(n=>{const i=A.findIndex(c=>c.n===n&&c.kind==='atk');if(i>=0)A.splice(i,1);});
+[['Warrior of Fortitude',['Warlord of Kings']],['Earthbound Golem',['Envious Sin']],['Earthbound Titan',['Envious Sin']],['Ghoul Soldier',[]],['Kaiju Beast',['Monster 10']],['Dimensional Clone',['Dimensional Manipulator']],['Undead Knight',['Beast Tamer']],['Undead General',['Beast Tamer']]].forEach(([n,by])=>{const c=A.find(x=>x.n===n&&x.kind==='atk');if(!c)return;c.bo='summon';c.by=by;delete c.u;c.g=c.grp=G.BATTLE;if(!c.d)c.d=by.length?'Summoned in battle by '+by.join(' / ')+'.':'Summoned in battle.';});
 
 const TRAITS=[
  {n:'None',r:'',dmg:0,hp:0,txt:'No trait'},
- {n:'Reinforce 1',r:'Common',dmg:0,hp:1,txt:'+1% HP'},{n:'Reinforce 2',r:'Common',dmg:0,hp:3,txt:'+3% HP'},{n:'Reinforce 3',r:'Common',dmg:0,hp:5,txt:'+5% HP'},
- {n:'Brawler 1',r:'Common',dmg:1,hp:0,txt:'+1% damage'},{n:'Brawler 2',r:'Common',dmg:3,hp:0,txt:'+3% damage'},{n:'Brawler 3',r:'Common',dmg:5,hp:0,txt:'+5% damage'},
- {n:'Prodigy 1',r:'Rare',dmg:1,hp:1,txt:'+1% damage, +1% HP'},{n:'Prodigy 2',r:'Rare',dmg:3,hp:3,txt:'+3% damage, +3% HP'},{n:'Prodigy 3',r:'Rare',dmg:5,hp:5,txt:'+5% damage, +5% HP'},
- {n:'Blitz 1',r:'Rare',dmg:1,hp:1,txt:'+1% damage, +1% HP, +1% cooldown reduction'},{n:'Blitz 2',r:'Rare',dmg:3,hp:3,txt:'+3% damage, +3% HP, +2% cooldown reduction'},{n:'Blitz 3',r:'Rare',dmg:5,hp:5,txt:'+5% damage, +5% HP, +3% cooldown reduction'},
- {n:'Midas',r:'Epic',dmg:7,hp:7,txt:'+7% damage, +7% HP, +1 luck'},{n:'Slayer',r:'Epic',dmg:7,hp:7,txt:'+7% damage, +7% HP, +3% boss chance, +1 luck'},
- {n:'Almighty',r:'Epic',dmg:12,hp:12,txt:'+12% damage, +12% HP, +3% border & boss chance, +3 luck'},
- {n:'Divine',r:'Epic',dmg:12,hp:12,txt:'+12% damage, +12% HP, +3% border & boss chance, +5% potion time, +3 luck'},
- {n:'Monarch',r:'Epic',dmg:20,hp:20,txt:'+20% damage, +20% HP, +3% cooldown reduction, +3% border & boss chance, +5% potion time, +5 luck'},
+ {n:'Brawler 1',r:'Basic',dmg:1,hp:0,txt:'+1% damage · 1 in 9'},{n:'Brawler 2',r:'Basic',dmg:3,hp:0,txt:'+3% damage · 1 in 11'},{n:'Brawler 3',r:'Basic',dmg:5,hp:0,txt:'+5% damage · 1 in 12'},
+ {n:'Reinforce 1',r:'Basic',dmg:0,hp:1,txt:'+1% HP · 1 in 9'},{n:'Reinforce 2',r:'Basic',dmg:0,hp:3,txt:'+3% HP · 1 in 11'},{n:'Reinforce 3',r:'Basic',dmg:0,hp:5,txt:'+5% HP · 1 in 12'},
+ {n:'Prodigy 1',r:'Basic',dmg:1,hp:1,txt:'+1% damage, +1% HP · 1 in 12'},{n:'Prodigy 2',r:'Basic',dmg:3,hp:3,txt:'+3% damage, +3% HP · 1 in 14'},{n:'Prodigy 3',r:'Basic',dmg:5,hp:5,txt:'+5% damage, +5% HP · 1 in 16'},
+ {n:'Blitz 1',r:'Gold',dmg:1,hp:1,txt:'+1% damage, +1% HP, +5% roll speed · 1 in 16'},{n:'Blitz 2',r:'Gold',dmg:3,hp:3,txt:'+3% damage, +3% HP, +10% roll speed · 1 in 20'},{n:'Blitz 3',r:'Gold',dmg:5,hp:5,txt:'+5% damage, +5% HP, +15% roll speed · 1 in 22'},
+ {n:'Midas',r:'Gold',dmg:7,hp:7,txt:'+7% damage, +7% HP, +1 luck · 1 in 33'},{n:'Slayer',r:'Gold',dmg:7,hp:7,txt:'+7% damage, +7% HP, +3% boss chance, +1 luck · 1 in 40'},
+ {n:'Almighty',r:'Rainbow',dmg:12,hp:12,txt:'+12% damage, +12% HP, +3% boss & border chance, +3 luck · 1 in 100'},
+ {n:'Divine',r:'Rainbow',dmg:12,hp:12,txt:'+12% damage, +12% HP, +3% boss & border chance, +3 luck, +5% potion duration · 1 in 167'},
+ {n:'Monarch',r:'Rainbow',dmg:20,hp:20,txt:'+20% damage, +20% HP, +3% boss & border chance, +5 luck, +5% potion duration, +15% roll speed · 1 in 370'},
+ {n:'Blessed',r:'Secret',dmg:30,hp:30,sc:1.08,txt:'+30% damage, +30% HP, heals 10% each round while active (20 times) and heals allies 10% every other round while active. Also +3% boss & border, +5 luck, +5% potion duration, +15% roll speed · 1 in 833'},
+ {n:'Overlord',r:'Secret',dmg:50,hp:50,sc:1.1,txt:'+50% damage, +50% HP, 10% dodge and 15% block chance (5 uses). Also +3% boss & border, +10 luck, +5% potion duration, +15% roll speed · 1 in 3,333'},
+ {n:'One Above All',r:'Secret',dmg:75,hp:75,sc:1.2,txt:'+75% damage, +75% HP, 10% chance to attack again, 10% chance to survive a fatal hit at 1 HP, damage ignores 35% damage reduction. Also +3% boss & border, +15 luck, +5% potion duration, +15% roll speed · 1 in 10,000'},
 ];
 const DB=[...A,...S];
 const VARIANTS=['Basic','Gold','Rainbow','Secret'];
@@ -800,11 +887,23 @@ function vMult(e){return Math.pow(4,Math.max(0,VARIANTS.indexOf(e.variant)));}
 function trait(e){return TRAITS.find(t=>t.n===e.trait)||TRAITS[0];}
 function effStats(e){const [b,est]=baseDmg(e);const t=trait(e);const m=vMult(e);return {dmg:b*m*(1+t.dmg/100),hp:b*2*m*(1+t.hp/100),est};}
 function tierOf(e){if(e.custom)return e.tier;const d=findDb(e);return d?d.t:'';}
-function atkScore(e){const s=effStats(e);const t=tierOf(e);const d=findDb(e);const raid=d&&d.grp===G.RAID&&!TIER_MULT[t]?1.3:1;return Math.sqrt(s.dmg*s.hp)*(TIER_MULT[t]||1)*raid*extraMult(e);}
+function atkScore(e){const s=effStats(e);const t=tierOf(e);const d=findDb(e);const raid=d&&d.grp===G.RAID&&!TIER_MULT[t]?1.3:1;return Math.sqrt(s.dmg*s.hp)*(TIER_MULT[t]||1)*raid*extraMult(e)*(trait(e).sc||1);}
 function tags(e){const d=findDb(e);return (d&&d.g)||[];}
 // ---------- SUMMONS / FUSIONS / UNOBTAINABLE ----------
 const BO=A.filter(c=>c.bo);
 function isBO(e){const d=findDb(e);return !!(d&&d.bo);}
+// ---------- RANKED ----------
+function allPool(){return DB.filter(d=>!d.bo&&!d.u&&(d.kind==='sup'||d.dmg>0||TIER_MULT[d.t])).map((d,i)=>{const o=state.owned.find(x=>x.name===d.n&&x.kind===d.kind);return {id:'all'+i,name:d.n,kind:d.kind,variant:'Basic',trait:'None',img:o&&o.img};});}
+function pool(){return state.src==='all'?allPool():state.owned;}
+function pickSrc(s){state.src=s;save();renderTeams();}
+function modeChips(){const cur=state.mode||'all';const src=state.src||'mine';return `<div class="segs" role="tablist" aria-label="Game mode">${[{id:'all',name:'All modes'},...MODES].map(m=>`<button class="seg ${cur===m.id?'on':''}" role="tab" aria-selected="${cur===m.id}" onclick="pickMode('${m.id}')">${esc(m.name)}</button>`).join('')}</div><div class="chips" style="margin:0 0 6px"><span class="mut" style="align-self:center;margin-right:2px">Build from</span><button class="chip ${src==='mine'?'on':''}" onclick="pickSrc('mine')">My cards</button><button class="chip ${src==='all'?'on':''}" onclick="pickSrc('all')">All cards</button></div>${src==='all'?'<p class="note" style="margin:-2px 2px 10px">Using every obtainable card at Basic with no trait. Unobtainable and battle-only cards are left out.</p>':''}`;}
+function pickMode(id){state.mode=id;save();renderTeams();}
+function skipNote(m){const names=[...new Set(state.owned.filter(e=>e.kind==='atk'&&((m.ban||[]).includes(e.name)||(m.noLimited&&isLimited(e)))).map(e=>e.name))];return names.length?`<p class="note" style="margin:0 0 6px;color:var(--bad)">Not allowed in this mode: ${names.map(esc).join(', ')}</p>`:'';}
+const SCALED={Balanced:{dmg:10000,hp:20000},Attack:{dmg:16000,hp:12500},Sustain:{dmg:6700,hp:27500}};
+function isLimited(e){const d=findDb(e);return !!(d&&d.grp===G.LMOON);}
+function uniq(arr,on){if(!on)return arr;const seen=new Set();return arr.filter(e=>{if(seen.has(e.name))return false;seen.add(e.name);return true;});}
+function scaledScore(e){const [b]=baseDmg(e);const d=findDb(e)||{};return (1+Math.log10(Math.max(b,10)))*(TIER_MULT[tierOf(e)]||1)*extraMult(e)*((d.d||'').length>200?1.1:1);}
+function styleFor(e){const d=findDb(e)||{};const x=((d.an||'')+' '+(d.d||'')).toLowerCase();if(/counter|reflect|absorb|heal|shield|revive|damage reduction|block/.test(x)&&!/execute|crit/.test(x))return 'Sustain';if(/execute|crit|overkill|pierc|follow[- ]up|times for|strikes/.test(x))return 'Attack';return 'Balanced';}
 function extraMult(e){if(e.custom)return 1;const d=findDb(e);if(!d)return 1;let sm=0,tr=0,fu=0;const b=d.dmg||EST_DMG[d.t]||150;
  BO.forEach(s=>{if(!(s.by||[]).includes(d.n))return;
   if(s.bo==='summon')sm+=0.4*Math.min((s.dmg||b*0.5)/b,1.5);
@@ -824,22 +923,80 @@ function teamNotes(a,sl){const d=findDb(a);if(!d)return '';const names=sl.map(s=
   if(s.bo==='summon')n.push('Summons '+esc(s.n));
   else if(s.bo==='transform')n.push('Transforms in battle');
   else if(s.bo==='fusion'){const o=s.by.find(x=>x!==d.n);if(o&&names.includes(o))n.push('Fuses with '+esc(o)+' into '+esc(s.n));}});
- return n.length?`<div class="why">${[...new Set(n)].join(' · ')}</div>`:'';}
+ return n.length?`<div class="why keep">${[...new Set(n)].join(' · ')}</div>`:'';}
 function metaCard(){
  const sc=d=>atkScore({name:d.n,kind:'atk',variant:'Basic',trait:'None'});
  const pool=DB.filter(d=>d.kind==='atk'&&!d.bo&&d.dmg>0).map(d=>({d,s:sc(d)})).sort((x,y)=>y.s-x.s);
  const top=pool.filter(x=>!x.d.u).slice(0,state.size||4);if(!top.length)return '';
  const cut=top[top.length-1].s;const alt=pool.filter(x=>x.d.u&&x.d.d&&x.d.dmg<=40000&&x.s>cut).slice(0,3);
- const row=x=>`<div class="di"><div class="t">${esc(x.d.n)}</div>${x.d.a?`<div class="an">${esc(x.d.a)}</div>`:''}<div class="why">${esc(x.d.grp||'')}${x.d.p?' · '+esc(x.d.p):''}</div>${teamNotes({name:x.d.n,kind:'atk'},[])}</div>`;
+ const row=x=>`<div class="di"><div class="t">${esc(x.d.n)}</div>${x.d.a?`<div class="an">${esc(x.d.a)}</div>`:''}<div class="why keep">${esc(x.d.grp||'')}${x.d.p?' · '+esc(x.d.p):''}</div>${teamNotes({name:x.d.n,kind:'atk'},[])}</div>`;
  return `<div class="card team"><h3>Meta picks (all cards)</h3><p class="mut" style="margin:0 0 6px">The strongest attackers you can still get, by Basic stats plus summons. Use this to see what to chase.</p><div class="deckInfo">${top.map(row).join('')}</div>${alt.length?`<p class="mut" style="margin:10px 0 6px"><b style="color:var(--bad)">Unobtainable alternatives</b>: use these only if you already own them.</p><div class="deckInfo">${alt.map(row).join('')}</div>`:''}</div>`;}
 
 // ---------- TABS ----------
-document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+document.querySelectorAll('nav.bnav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+const NAV_OF={where:'add',card:'add'};
+let curTab='home',prevTab='add';
 function showTab(t){
-  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  if(t==='card'&&curTab!=='card')prevTab=curTab;
+  curTab=t;
+  const nt=NAV_OF[t]||t;
+  document.querySelectorAll('nav.bnav button').forEach(b=>{const on=b.dataset.tab===nt;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id==='tab-'+t));
-  if(t==='mine')renderMine(); if(t==='add')renderDb(); if(t==='where')renderWhere(); if(t==='scan')renderRefs();
+  if(t==='home')renderHome(); if(t==='mine')renderMine(); if(t==='add')renderDb(); if(t==='where')renderWhere(); if(t==='scan')renderRefs(); if(t==='teams')renderTeams(); if(t==='card')renderCard();
   window.scrollTo(0,0);
+}
+// Any element with data-go switches tabs; data-card opens a card page; data-mode opens Teams on that mode
+document.addEventListener('click',ev=>{
+  const g=ev.target.closest('[data-go]');if(g){ev.preventDefault();showTab(g.dataset.go);return;}
+  if(ev.target.closest('.plus'))return;
+  const c=ev.target.closest('[data-card]');if(c){showCard(DB[+c.dataset.card]);return;}
+  const m=ev.target.closest('[data-mode]');if(m){state.mode=m.dataset.mode;save();showTab('teams');}
+});
+
+// ---------- HOME ----------
+const MODE_COLOR={best:'#a879ff',boss:'#5fd39a',any:'#ff6b81',scaled:'#f5c451',backup:'#5bb8ff'};
+function artFor(d,own){
+  const o=own||state.owned.find(x=>x.name===d.n&&x.kind===d.kind&&x.img);
+  if(o&&o.img)return `<img src="${o.img}" alt="">`;
+  const r=(typeof refs!=='undefined'?refs:[]).find(r=>r.name===d.n&&r.kind===d.kind&&r.th&&(!r.skin||r.skin==='base'))||(typeof refs!=='undefined'?refs:[]).find(r=>r.name===d.n&&r.kind===d.kind&&r.th);
+  if(r)return `<img src="${r.th}" alt="">`;
+  return esc(initials(d.n));
+}
+function renderHome(){
+  const nA=state.owned.filter(e=>e.kind==='atk').length,nS=state.owned.filter(e=>e.kind==='sup').length;
+  $('#homeCount').textContent=state.owned.length?`${nA} attack · ${nS} support`:'Nothing added yet';
+  const top=DB.filter(d=>d.kind==='atk'&&!d.bo&&!d.u&&(d.t==='SS'||d.t==='S')).sort((x,y)=>(TIER_MULT[y.t]||0)-(TIER_MULT[x.t]||0)||(y.dmg||0)-(x.dmg||0)).slice(0,12);
+  $('#homeMeta').innerHTML=top.map(d=>`<button class="mcard" data-card="${DB.indexOf(d)}"><span class="ctile"><span class="art">${artFor(d)}</span><span class="tbadge">${esc(d.t)}</span></span><span class="cn">${esc(d.n)}</span></button>`).join('')||'<p class="mut">No tier data yet.</p>';
+  $('#homeModes').innerHTML=MODES.map(m=>`<button class="mrow" data-mode="${m.id}"><span class="dot" style="background:${MODE_COLOR[m.id]||'#a879ff'}"></span><span class="nm">${esc(m.name)}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>`).join('');
+}
+$('#homeForm').addEventListener('submit',ev=>{ev.preventDefault();$('#q').value=$('#homeQ').value;showTab('add');});
+
+// ---------- CARD PAGE ----------
+let cardD=null,cardV='Basic';
+function showCard(d){if(!d)return;cardD=d;cardV='Basic';showTab('card');}
+function teamsWith(d){const out=[];MODES.forEach(m=>{if(m.exclude)return;try{const t=buildTeam(m,new Set());t.slots.forEach((s,i)=>{if((d.kind==='atk'&&s.a&&s.a.name===d.n)||(d.kind==='sup'&&s.s&&s.s.name===d.n))out.push({m,i,s});});}catch(e){}});return out;}
+function renderCard(){
+  const d=cardD,box=$('#cardView');if(!d){box.innerHTML='';return;}
+  const owned=state.owned.filter(o=>o.name===d.n&&o.kind===d.kind),atk=d.kind==='atk';
+  const best=owned.slice().sort((x,y)=>VARIANTS.indexOf(y.variant)-VARIANTS.indexOf(x.variant))[0];
+  const frame=atk?(best?best.variant:'Basic'):'sup';
+  const m=Math.pow(4,Math.max(0,VARIANTS.indexOf(cardV)));
+  const skins=(typeof refs!=='undefined'?refs:[]).filter(r=>r.name===d.n&&r.kind===d.kind&&r.th);
+  const where=d.grp&&d.grp!==G.NONE?d.grp+(d.p?' · '+d.p:''):'';
+  let h=`<button class="backBtn" data-go="${prevTab}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Back</button>`;
+  h+=`<div class="cHero"><span class="ctile ${frame==='sup'?'sup':'b-'+frame}"><span class="art">${artFor(d,best)}</span></span><div style="min-width:0">${tierBadge(d)}<span class="kindTag ${atk?'atk':'sup'}">${atk?'Attack':'Support'}</span><h1>${esc(d.n)}</h1>${d.a?`<div class="mut">${esc(atk?d.a:'Also called '+d.a)}</div>`:''}${owned.length?`<div class="note" style="color:var(--good);margin-top:4px">You own ${owned.length}</div>`:''}</div></div>`;
+  if(atk){
+    h+=`<div class="segs" role="tablist" aria-label="Version">${VARIANTS.map(v=>`<button class="seg ${v===cardV?'on':''}" role="tab" aria-selected="${v===cardV}" onclick="cardV='${v}';renderCard()">${v}</button>`).join('')}</div>`;
+    h+=d.dmg?`<div class="statGrid"><div><small>Damage (${cardV})</small><b>${fmt(d.dmg*m)}</b></div><div><small>Health (${cardV})</small><b>${fmt(d.dmg*2*m)}</b></div></div>`:'<p class="note">Stats for this card haven’t been added yet.</p>';
+  }
+  h+=(d.an||d.d)?`<div class="ab">${d.an?`<b>${esc(d.an)}</b>`:''}${d.d?esc(d.d):'<span class="mut">Ability text not added yet.</span>'}</div>`:'<div class="ab"><span class="mut">Ability not added yet.</span></div>';
+  h+=`<h2>Skins</h2>`+(skins.length?`<div class="skinRow">${skins.map(r=>`<figure><img src="${r.th}" alt="${esc(d.n)} ${esc(r.skin||'base')}"><figcaption>${r.skin&&r.skin!=='base'?esc(r.skin):'Base'}</figcaption></figure>`).join('')}</div>`:'<p class="mut" style="margin:0">No skin pictures added yet.</p>');
+  if(where)h+=`<div class="src" style="display:block;margin-top:14px;padding:10px 12px;font-size:13px">How to get: ${esc(where)}</div>`;
+  h+=boInfo(d);
+  if(owned.length){const tw=teamsWith(d);h+=`<h2>Used in your teams</h2>`+(tw.length?`<div class="list">${tw.map(x=>`<button class="mrow" data-mode="${x.m.id}"><span class="dot" style="background:${MODE_COLOR[x.m.id]||'#a879ff'}"></span><span class="nm">${esc(x.m.name)} · card ${x.i+1}</span></button>`).join('')}</div>`:'<p class="mut" style="margin:0">Not in any of your current teams.</p>');}
+  if(!d.bo)h+=`<div style="height:64px"></div><div class="stickyAdd"><button class="btn pri" id="cardAdd">${owned.length?'Add another copy':'Add to my cards'}</button></div>`;
+  box.innerHTML=h;
+  if($('#cardAdd'))$('#cardAdd').onclick=()=>openSheet({mode:'add',d});
 }
 
 // ---------- ADD TAB ----------
@@ -855,7 +1012,7 @@ function subLine(d){
 }
 function dbRow(d){
   const c=state.owned.filter(o=>o.name===d.n&&o.kind===d.kind).length;
-  return `<div class="item">${tierBadge(d)}<div class="nm"><b>${esc(d.n)}</b><small>${esc(subLine(d))}</small>${c?`<small style="color:var(--good)"> · own ${c}</small>`:''}${d.u?'<small style="color:var(--bad)"> · Unobtainable</small>':''}${d.bo?'<small style="color:#c9a8ff"> · Battle only</small>':''}</div>${d.bo?`<button class="plus" data-v="${DB.indexOf(d)}" aria-label="View ${esc(d.n)}">i</button>`:`<button class="plus" data-i="${DB.indexOf(d)}" aria-label="Add ${esc(d.n)}">+</button>`}</div>`;
+  return `<div class="item" data-card="${DB.indexOf(d)}">${tierBadge(d)}<div class="nm"><b>${esc(d.n)}</b><small>${esc(subLine(d))}</small>${c?`<small style="color:var(--good)"> · own ${c}</small>`:''}${d.u?'<small style="color:var(--bad)"> · Unobtainable</small>':''}${d.bo?'<small style="color:#c9a8ff"> · Battle only</small>':''}</div>${d.bo?`<button class="plus" data-v="${DB.indexOf(d)}" aria-label="View ${esc(d.n)}">i</button>`:`<button class="plus" data-i="${DB.indexOf(d)}" aria-label="Add ${esc(d.n)}">+</button>`}</div>`;
 }
 function bindPlus(root){root.querySelectorAll('.plus').forEach(b=>b.onclick=()=>b.dataset.v!==undefined?viewSheet(DB[+b.dataset.v]):openSheet({mode:'add',d:DB[+b.dataset.i]}));}
 function renderDb(){
@@ -933,7 +1090,7 @@ function openSheet(o){
     if(o.entry){Object.assign(o.entry,rec);} else {rec.id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);state.owned.push(rec);}
     if(!save()) toast('Phone storage is full. Try a smaller picture.');
     closeSheet();
-    if(o.entry)renderMine(); else {renderDb(); if($('#tab-where').classList.contains('on'))renderWhere(); toast('Added '+rec.name);}
+    if(o.entry)renderMine(); else {renderDb(); if($('#tab-where').classList.contains('on'))renderWhere(); if($('#tab-card').classList.contains('on'))renderCard(); toast('Added '+rec.name);}
   };
   $('#sheetBg').classList.add('on');sh.classList.add('on');
 }
@@ -949,14 +1106,25 @@ function entryRow(e){
   const badge=e.custom?`<span class="tier t-${e.tier}">${esc(e.tier)}*</span>`:tierBadge(d);
   return `<div class="item" data-id="${e.id}" style="cursor:pointer">${picTag(e)||badge||'<span class="tier t-D">—</span>'}<div class="nm"><b>${esc(e.name)}</b><small>${e.kind==='atk'?`<span class="v v-${e.variant}">${e.variant}</span>${e.trait!=='None'?esc(e.trait):'No trait'}`:'Support'}${e.skin&&e.skin!=='base'?' · '+esc(e.skin)+' skin':''}${statLine(e)}${e.custom?' · custom':''}</small></div><span class="mut">Edit</span></div>`;
 }
+let mineFilter='all';
+const MINE_CHIPS=[['all','All'],['atk','Attack'],['sup','Support'],['hi','Rainbow+'],['skin','Has skin']];
+function ctile(e,cap){const v=e.kind==='atk'?e.variant:'Basic';return `<button class="ctile ${e.kind==='sup'?'sup':'b-'+v}" data-id="${e.id}" aria-label="Edit ${esc(e.name)}"><span class="art">${e.img?`<img src="${e.img}" alt="">`:esc(initials(e.name))}</span>${cap?`<span class="cap">${cap}</span>`:''}</button>`;}
 function renderMine(){
-  const a=state.owned.filter(e=>e.kind==='atk'),s=state.owned.filter(e=>e.kind==='sup');
-  $('#cAtk').textContent=a.length;$('#cSup').textContent=s.length;
-  if(!state.owned.length){$('#mineList').innerHTML='<div class="empty">No cards yet. Go to <b>Add cards</b> and tap + on the cards you own.</div>';return;}
-  a.sort((x,y)=>atkScore(y)-atkScore(x));
-  s.sort((x,y)=>supScore(y,MODES[0])-supScore(x,MODES[0]));
-  $('#mineList').innerHTML=(a.length?'<h2>Attackers</h2>'+a.map(entryRow).join(''):'')+(s.length?'<h2>Supports</h2>'+s.map(entryRow).join(''):'');
-  document.querySelectorAll('#mineList .item').forEach(r=>r.onclick=()=>openSheet({mode:'edit',entry:state.owned.find(x=>x.id===r.dataset.id)}));
+  const all=state.owned;
+  $('#mineCount').textContent=`${all.length} card${all.length===1?'':'s'}`;
+  $('#mineChips').innerHTML=MINE_CHIPS.map(([k,l])=>`<button class="chip ${mineFilter===k?'on':''}" data-f="${k}">${l}</button>`).join('');
+  $('#mineChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{mineFilter=c.dataset.f;renderMine();});
+  if(!all.length){$('#mineList').innerHTML='<div class="empty">No cards yet. Tap <b>Scan</b> to add them from screenshots, or <b>Add card</b> to pick them from the wiki.</div>';return;}
+  const f=e=>mineFilter==='all'||(mineFilter==='atk'&&e.kind==='atk')||(mineFilter==='sup'&&e.kind==='sup')||(mineFilter==='hi'&&e.kind==='atk'&&(e.variant==='Rainbow'||e.variant==='Secret'))||(mineFilter==='skin'&&e.skin&&e.skin!=='base');
+  const a=all.filter(e=>e.kind==='atk'&&f(e)).sort((x,y)=>atkScore(y)-atkScore(x));
+  const s=all.filter(e=>e.kind==='sup'&&f(e)).sort((x,y)=>supScore(y,MODES[0])-supScore(x,MODES[0]));
+  const cell=e=>{let cap='';if(e.kind==='atk'){const st=effStats(e);cap=fmt(st.dmg)+(st.est?'*':'');}return `<div class="cell">${ctile(e,cap)}<span class="cn">${esc(e.name)}${e.skin&&e.skin!=='base'?' · '+esc(e.skin):''}</span></div>`;};
+  let h='';
+  if(a.length)h+=`<div class="secLbl atk">Attack<span>${a.length}</span></div><div class="cgrid">${a.map(cell).join('')}</div>`;
+  if(s.length)h+=`<div class="secLbl sup">Support<span>${s.length}</span></div><div class="cgrid">${s.map(cell).join('')}</div>`;
+  if(a.some(e=>effStats(e).est))h+='<p class="note">* = estimated damage</p>';
+  $('#mineList').innerHTML=h||'<div class="empty">No cards match this filter.</div>';
+  $('#mineList').querySelectorAll('.ctile').forEach(b=>b.onclick=()=>openSheet({mode:'edit',entry:state.owned.find(x=>x.id===b.dataset.id)}));
 }
 $('#exportBtn').onclick=async()=>{
   const code=btoa(unescape(encodeURIComponent(JSON.stringify(state.owned.map(({img,...r})=>r)))));
@@ -977,7 +1145,8 @@ $('#clearBtn').onclick=()=>{
 const MODES=[
  {id:'best',name:'Best overall',desc:'Your strongest cards and supports for everyday play.',sup:{}},
  {id:'boss',name:'Boss & raid fights',desc:'For one tough enemy. Skips supports that need several enemies and leans on survival and damage.',sup:{multi:0,surv:1.2,dmg:1.15}},
- {id:'pvp',name:'Tower & PvP',desc:'For long fights against full decks. Favors survival and supports that shut down enemy abilities.',sup:{surv:1.25,ctrl:1.2,multi:1.1}},
+ {id:'any',name:'Ranked · Any Mode',desc:'Ranked with your real stats and traits. No duplicate cards, and Cosmic Villain is banned. Favors survival and supports that shut down enemy abilities.',sup:{surv:1.25,ctrl:1.2,multi:1.1},ranked:1,ban:['Cosmic Villain']},
+ {id:'scaled',name:'Ranked · Scaled Mode',desc:'Every card’s stats are reset by play style (Balanced 20K HP / 10K DMG, Attack 12.5K / 16K, Sustain 27.5K / 6.7K) and traits are off, so abilities decide. No duplicates; banned and limited cards are skipped.',sup:{surv:1.2,ctrl:1.25,multi:1.1},ranked:1,scaled:1,noLimited:1,ban:['Lunar Guardian','Sun Lion','Cosmic Villain','Titania','Combat Giant','The Almighty','Dimensional Manipulator','Heavenly Creation','Ascended Golden Vampire']},
  {id:'backup',name:'Backup team',desc:'Your best team without the cards used in Best overall, so you have a second deck ready.',sup:{},exclude:'best'},
 ];
 function supScore(e,mode){
@@ -987,18 +1156,19 @@ function supScore(e,mode){
 }
 function buildTeam(mode,used){
   const n=state.size;
-  const atks=state.owned.filter(e=>e.kind==='atk'&&!used.has(e.id)&&!isBO(e)).sort((a,b)=>atkScore(b)-atkScore(a)).slice(0,n);
-  const sups=state.owned.filter(e=>e.kind==='sup'&&!used.has(e.id)&&supScore(e,mode)>0).sort((a,b)=>supScore(b,mode)-supScore(a,mode)).slice(0,atks.length);
+  const okA=e=>!(mode.ban||[]).includes(e.name)&&!(mode.noLimited&&isLimited(e));const sc=e=>mode.scaled?scaledScore(e):atkScore(e);
+  const atks=uniq(pool().filter(e=>e.kind==='atk'&&!used.has(e.id)&&!isBO(e)&&okA(e)).sort((a,b)=>sc(b)-sc(a)),mode.ranked).slice(0,n);
+  const sups=uniq(pool().filter(e=>e.kind==='sup'&&!used.has(e.id)&&supScore(e,mode)>0).sort((a,b)=>supScore(b,mode)-supScore(a,mode)),mode.ranked).slice(0,atks.length);
   const fall=sups.filter(s=>tags(s).includes('fall')),surv=sups.filter(s=>tags(s).includes('surv')&&!fall.includes(s)),rest=sups.filter(s=>!surv.includes(s)&&!fall.includes(s));
   // Top card goes first. Supports that trigger when their card falls go on weaker cards (never the carry),
   // and those cards move to the top so the cards after them get the boost.
-  const pairs=atks.map(a=>({a,s:null}));
+  const pairs=atks.map(a=>{const style=mode.scaled?styleFor(a):'';return {a,s:null,style,st:style?SCALED[style]:null};});
   [...pairs].reverse().forEach(p=>{if(!p.s&&fall.length&&p!==pairs[0])p.s=fall.shift();});
-  const pool=[...surv,...rest,...fall];
-  pairs.forEach(p=>{if(!p.s&&pool.length)p.s=pool.shift();});
+  const spool=[...surv,...rest,...fall];
+  pairs.forEach(p=>{if(!p.s&&spool.length)p.s=spool.shift();});
   const isFall=p=>p.s&&tags(p.s).includes('fall');
   const slots=[...pairs.filter(isFall),...pairs.filter(p=>!isFall(p))];
-  let dmg=0,hp=0,est=false;atks.forEach(a=>{const s=effStats(a);dmg+=s.dmg;hp+=s.hp;est=est||s.est;});
+  let dmg=0,hp=0,est=false;pairs.forEach(p=>{const s=p.st||effStats(p.a);dmg+=s.dmg;hp+=s.hp;est=est||!!s.est;});
   return {slots,dmg,hp,est};
 }
 function whyFor(sup,i){
@@ -1018,21 +1188,22 @@ function tile(e,i,cap){
 function animeOf(e){const d=findDb(e);return d&&d.kind==='atk'&&d.a?d.a:'';}
 function renderTeams(){
   const out=$('#teams');
-  const nA=state.owned.filter(e=>e.kind==='atk').length,nS=state.owned.filter(e=>e.kind==='sup').length;
-  const meta=metaCard();if(!nA){out.innerHTML=meta+'<div class="empty">Add some attacker cards first. Go to <b>Add cards</b>.</div>';return;}
-  const results={};let html=meta;
+  const nA=pool().filter(e=>e.kind==='atk').length,nS=state.owned.filter(e=>e.kind==='sup').length;
+  const meta=metaCard();if(!nA){out.innerHTML=meta+'<div class="empty">Add some attacker cards first. Go to <b>My cards</b> or <b>Scan</b>.</div>';return;}
+  const results={};let html=modeChips()+meta;
   MODES.forEach(m=>{
     const used=new Set();
     if(m.exclude&&results[m.exclude]) results[m.exclude].slots.forEach(s=>{used.add(s.a.id);if(s.s)used.add(s.s.id);});
     const t=buildTeam(m,used);results[m.id]=t;
+    if(state.mode&&state.mode!=='all'&&m.id!==state.mode)return;
     if(m.id==='backup'&&!t.slots.length){html+=`<div class="card team"><h3>${m.name}</h3><p class="mut" style="margin:0">Add more attackers to get a second team.</p></div>`;return;}
-    html+=`<div class="card team"><h3>${m.name}</h3><p class="stats" style="margin:0 0 4px">Team <b>DMG ${fmt(t.dmg)}</b> · <b>HP ${fmt(t.hp)}</b>${t.est?' <span class="est">includes est.</span>':''}</p><p class="mut" style="margin:0 0 6px">${m.desc}</p>`;
+    html+=`<div class="card team"><h3>${m.name}</h3><p class="stats" style="margin:0 0 4px">Team <b>DMG ${fmt(t.dmg)}</b> · <b>HP ${fmt(t.hp)}</b>${t.est?' <span class="est">includes est.</span>':''}</p><p class="mut" style="margin:0 0 6px">${m.desc}</p>${skipNote(m)}`;
     const sl=t.slots;
-    html+=`<div class="deckWrap"><div class="deck"><div class="deckCol sup"><div class="deckHd">Support</div>${sl.map(s=>tile(s.s,null,s.s?(tierOf(s.s)||''):'')).join('')}</div><div class="deckCol atk"><div class="deckHd">Attack</div>${sl.map((s,i)=>{const st=effStats(s.a);return tile(s.a,i+1,fmt(st.dmg)+(st.est?'*':''));}).join('')}</div></div>
-    <div class="deckInfo">${sl.map((s,i)=>{const an=animeOf(s.a),w=whyFor(s.s,i);return `<div class="di"><div class="t">${i+1}. ${label(s.a)}</div>${an?`<div class="an">${esc(an)}</div>`:''}${teamNotes(s.a,sl)}<div class="s">${s.s?'Support: '+esc(s.s.name):'No support left for this card'}</div>${w?`<div class="why">${esc(w)}</div>`:''}</div>`;}).join('')}</div></div>
+    html+=`<div class="deckWrap"><div class="deck"><div class="deckCol sup"><div class="deckHd">Support</div>${sl.map(s=>tile(s.s,null,s.s?(tierOf(s.s)||''):'')).join('')}</div><div class="deckCol atk"><div class="deckHd">Attack</div>${sl.map((s,i)=>{const st=s.st||effStats(s.a);return tile(s.a,i+1,fmt(st.dmg)+(st.est?'*':''));}).join('')}</div></div>
+    <div class="deckInfo">${sl.map((s,i)=>{const an=animeOf(s.a),w=whyFor(s.s,i);return `<div class="di"><div class="t">${i+1}. ${label(s.a)}</div>${an?`<div class="an">${esc(an)}</div>`:''}${s.style?`<div class="why keep">Play style: <b>${s.style}</b></div>`:''}${teamNotes(s.a,sl)}<div class="s">${s.s?'Support: '+esc(s.s.name):'No support left for this card'}</div>${w?`<div class="why">${esc(w)}</div>`:''}</div>`;}).join('')}</div></div>
     ${t.est?'<p class="orderNote">* = estimated damage</p>':''}`;
     if(t.slots.length<state.size) html+=`<p class="note">Only ${t.slots.length} attacker${t.slots.length===1?'':'s'} available for this team.</p>`;
-    html+='</div>';
+    html+=`<button class="btn whyBtn" onclick="const c=this.closest('.team');c.classList.toggle('showWhy');this.textContent=c.classList.contains('showWhy')?'Hide reasons':'Why this team?'">Why this team?</button></div>`;
   });
   if(!nS) html+='<p class="note">Tip: add your support cards too. They make a big difference.</p>';
   out.innerHTML=html;
@@ -1041,7 +1212,7 @@ function renderSize(){
   $('#sizeChips').innerHTML=[1,2,3,4,5,6].map(n=>`<button class="chip ${n===state.size?'on':''}" data-n="${n}">${n}</button>`).join('');
   document.querySelectorAll('#sizeChips .chip').forEach(c=>c.onclick=()=>{state.size=+c.dataset.n;save();renderSize();if($('#teams').innerHTML)renderTeams();});
 }
-$('#buildBtn').onclick=renderTeams;
+
 
 // ---------- SCAN ----------
 const REFKEY='acc-refs-v1';
@@ -1202,7 +1373,7 @@ function addScanned(){
   scanResults=null;
   $('#reviewBox').innerHTML=`<div class="card"><h3>Added ${added} card${added===1?'':'s'}</h3>${missing?`<p class="mut">${missing} ticked card${missing===1?' was':'s were'} skipped because no name was picked.</p>`:''}${taught?`<p class="mut">Saved ${taught} picture${taught===1?'':'s'} to help future scans.</p>`:''}<div class="row" style="margin-top:8px"><button class="btn" id="goMine">See my cards</button><button class="btn pri" id="goTeams">Build my teams</button></div></div>`;
   $('#goMine').onclick=()=>showTab('mine');
-  $('#goTeams').onclick=()=>{showTab('teams');renderTeams();};
+  $('#goTeams').onclick=()=>showTab('teams');
   renderRefs();
 }
 function renderRefs(){
@@ -1235,7 +1406,7 @@ $('#allCards').innerHTML=DB.map(d=>`<option value="${esc(d.n)}">`).join('');
 
 // ---------- INIT ----------
 renderSize();
-showTab(state.owned.length?'mine':'add');
+showTab('home');
 </script>
 <script type="module">
 // ---------- GOOGLE SIGN-IN + CLOUD SAVE ----------

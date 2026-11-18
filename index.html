@@ -1424,8 +1424,8 @@ function autoCells(src){
   let bi=0,bc=-1;B.forEach((b,i)=>{const c=B.filter(o=>Math.abs(o[2]-b[2])<b[2]*.1&&Math.abs(o[3]-b[3])<b[3]*.1).length;if(c>bc){bc=c;bi=i;}});
   const G=B.filter(o=>Math.abs(o[2]-B[bi][2])<B[bi][2]*.12&&Math.abs(o[3]-B[bi][3])<B[bi][3]*.12);
   const w=med(G.map(g=>g[2])),h=med(G.map(g=>g[3]));
-  const dxs=[],dys=[];G.forEach(g=>G.forEach(k=>{if(Math.abs(k[1]-g[1])<h*.2&&k[0]-g[0]>w*.85&&k[0]-g[0]<w*1.6)dxs.push(k[0]-g[0]);if(Math.abs(k[0]-g[0])<w*.2&&k[1]-g[1]>h*.85&&k[1]-g[1]<h*1.6)dys.push(k[1]-g[1]);}));
-  const PX=dxs.length?med(dxs):w*1.12,PY=dys.length?med(dys):(PX-w)+h;
+  const PY0=(()=>{const d=[];G.forEach(g=>G.forEach(k=>{if(Math.abs(k[0]-g[0])<w*.2&&k[1]-g[1]>h*.85&&k[1]-g[1]<h*1.6)d.push(k[1]-g[1]);}));return d.length?med(d):0;})();
+  const PX0=(()=>{const d=[];G.forEach(g=>G.forEach(k=>{if(Math.abs(k[1]-g[1])<h*.2&&k[0]-g[0]>w*.85&&k[0]-g[0]<w*1.6)d.push(k[0]-g[0]);}));return d.length?med(d):w*1.12;})();
   const inImg=(x,y)=>x>=0&&y>=0&&x+w<=W&&y+h<=H;
   const at=(x,y)=>mx[y*W+x];
   function art(x,y){x=Math.round(x);y=Math.round(y);if(!inImg(x,y))return false;let s=0,s2=0,n=0;
@@ -1434,29 +1434,45 @@ function autoCells(src){
   function ring(x,y){x=Math.round(x);y=Math.round(y);if(!inImg(x,y))return null;const r=Math.max(2,w/40|0);let R=0,Gc=0,Bc=0,n=0;
     const add=(xx,yy)=>{const j=(yy*W+xx)*4;R+=px[j];Gc+=px[j+1];Bc+=px[j+2];n++;};
     for(let k=1;k<=r;k++){for(let xx=x+(w/5|0);xx<x+(4*w/5|0);xx++){add(xx,y+k);add(xx,y+h-1-k);}for(let yy=y+(h/5|0);yy<y+(4*h/5|0);yy++){add(x+k,yy);add(x+w-1-k,yy);}}
-    return [R/n,Gc/n,Bc/n];}
+    const m=[R/n,Gc/n,Bc/n];let v=0;const add2=(xx,yy)=>{const j=(yy*W+xx)*4;v+=Math.abs(px[j]-m[0])+Math.abs(px[j+1]-m[1])+Math.abs(px[j+2]-m[2]);};
+    for(let k=1;k<=r;k++){for(let xx=x+(w/5|0);xx<x+(4*w/5|0);xx++){add2(xx,y+k);add2(xx,y+h-1-k);}for(let yy=y+(h/5|0);yy<y+(4*h/5|0);yy++){add2(x+k,yy);add2(x+w-1-k,yy);}}
+    return [m[0],m[1],m[2],v/n/3];}
   function edge(x,y){x=Math.round(x);y=Math.round(y);if(x<-w*.02||y<-h*.02||x+w>W+w*.02||y+h>H+h*.02)return false;x=Math.max(0,Math.min(x,W-w));y=Math.max(0,Math.min(y,H-h));
     const r=Math.max(2,w/40|0);let ib=0,in_=0,od=0,on=0;
     const I=(xx,yy)=>{in_++;if(at(xx,yy)>TH)ib++;},O=(xx,yy)=>{on++;if(at(xx,yy)<TH)od++;};
     for(let k=r;k<2*r;k++){for(let xx=x+(w/4|0);xx<x+(3*w/4|0);xx++){I(xx,y+k);I(xx,y+h-1-k);if(y-1-k>=0)O(xx,y-1-k);if(y+h+k<H)O(xx,y+h+k);}
       for(let yy=y+(h/4|0);yy<y+(3*h/4|0);yy++){I(x+k,yy);I(x+w-1-k,yy);if(x-1-k>=0)O(x-1-k,yy);if(x+w+k<W)O(x+w+k,yy);}}
-    return ib/in_>.55&&on>0&&od/on>.55;}
-  // group boxes that sit on the same grid
+    return on>0&&od/on>.5;}
+  // group boxes that touch as neighbours in a grid
   const par=G.map((_,i)=>i),fd=i=>{while(par[i]!==i){par[i]=par[par[i]];i=par[i];}return i;};
-  for(let i=0;i<G.length;i++)for(let j=i+1;j<G.length;j++){const a=(G[j][0]-G[i][0])/PX,b=(G[j][1]-G[i][1])/PY;if(Math.abs(a-Math.round(a))<.12&&Math.abs(b-Math.round(b))<.12)par[fd(i)]=fd(j);}
+  const nb=(g,k)=>(Math.abs(k[1]-g[1])<h*.2&&Math.abs(k[0]-g[0])>w*.9&&Math.abs(k[0]-g[0])<w*1.4)||(Math.abs(k[0]-g[0])<w*.2&&Math.abs(k[1]-g[1])>h*.9&&Math.abs(k[1]-g[1])<h*1.4);
+  const PY1=PY0||(PX0-w)+h,int=v=>Math.abs(v-Math.round(v))<.1&&Math.round(v)!==0;
+  const al=(g,k)=>(Math.abs(k[1]-g[1])<h*.15&&int((k[0]-g[0])/PX0))||(Math.abs(k[0]-g[0])<w*.15&&int((k[1]-g[1])/PY1));
+  for(let i=0;i<G.length;i++)for(let j=i+1;j<G.length;j++)if(nb(G[i],G[j])||al(G[i],G[j]))par[fd(i)]=fd(j);
   const groups={};G.forEach((g,i)=>(groups[fd(i)]=groups[fd(i)]||[]).push(g));
   const gl=Object.values(groups),big=Math.max(...gl.map(g=>g.length)),out=[];
-  gl.forEach(grp=>{
+  gl.sort((p,q)=>q.length-p.length).forEach(grp=>{
     if(grp.length<2&&big>=3)return;
+    const dx=[],dy=[];grp.forEach(g=>grp.forEach(k=>{if(Math.abs(k[1]-g[1])<h*.2&&k[0]-g[0]>w*.9&&k[0]-g[0]<w*1.4)dx.push(k[0]-g[0]);if(Math.abs(k[0]-g[0])<w*.2&&k[1]-g[1]>h*.9&&k[1]-g[1]<h*1.4)dy.push(k[1]-g[1]);}));
+    const PX=dx.length?med(dx):PX0,PY=dy.length?med(dy):PY1;
     const [ax,ay]=grp[0],rs=grp.map(g=>ring(g[0],g[1])).filter(Boolean);
-    const RC=[0,1,2].map(k=>med(rs.map(r=>r[k])));
-    const rOK=(x,y)=>{const r=ring(x,y);return r&&(Math.abs(r[0]-RC[0])+Math.abs(r[1]-RC[1])+Math.abs(r[2]-RC[2]))/3<30;};
-    const ks=grp.map(g=>[Math.round((g[0]-ax)/PX),Math.round((g[1]-ay)/PY)]);
+    const RC=[0,1,2,3].map(k=>med(rs.map(r=>r[k])));
+    const rD=(x,y)=>{const r=ring(x,y);return r?[(Math.abs(r[0]-RC[0])+Math.abs(r[1]-RC[1])+Math.abs(r[2]-RC[2]))/3,r[3]]:[999,999];};
+    const rOK=(x,y)=>{const [d,v]=rD(x,y);return d<28&&v<Math.max(RC[3]*1.8,RC[3]+12);},rTight=(x,y)=>{const [d,v]=rD(x,y);return d<16&&v<Math.max(RC[3]*1.3,RC[3]+6);};
+    const solid=(x,y)=>{x=Math.max(0,Math.min(W-w,Math.round(x)));y=Math.max(0,Math.min(H-h,Math.round(y)));let b=0,n=0;for(let yy=y;yy<y+h;yy+=3)for(let xx=x;xx<x+w;xx+=3){n++;if(bg[yy*W+xx])b++;}return b/n;};
+    const BG0=med(grp.map(g=>solid(g[0],g[1])));const solidOK=(x,y)=>solid(x,y)<=Math.max(.08,BG0+.1);
+    const free=(x,y)=>!out.some(o=>Math.abs(o[0]-x)<w*.6&&Math.abs(o[1]-y)<h*.6);
+    const ks=grp.map(g=>[Math.round((g[0]-ax)/PX),Math.round((g[1]-ay)/PY)]),key=(a,b)=>a+','+b,have=new Map();
+    ks.forEach((k,i)=>have.set(key(k[0],k[1]),[grp[i][0],grp[i][1]]));
     const k0=Math.min(...ks.map(k=>k[0])),k1=Math.max(...ks.map(k=>k[0])),l0=Math.min(...ks.map(k=>k[1])),l1=Math.max(...ks.map(k=>k[1]));
-    for(let ky=l0-1;ky<=l1+1;ky++)for(let kx=k0-1;kx<=k1+1;kx++){
-      const i=ks.findIndex(k=>k[0]===kx&&k[1]===ky);if(i>=0){out.push([grp[i][0],grp[i][1]]);continue;}
-      const x=ax+kx*PX,y=ay+ky*PY,inside=kx>=k0&&kx<=k1&&ky>=l0&&ky<=l1;
-      if(inside?(art(x,y)||rOK(x,y))&&inImg(Math.round(x),Math.round(y)):(grp.length>=3&&edge(x,y)&&art(x,y)&&rOK(x,y)))out.push([x,y]);}
+    // fill holes inside the found grid
+    for(let ky=l0;ky<=l1;ky++)for(let kx=k0;kx<=k1;kx++){if(have.has(key(kx,ky)))continue;const x=ax+kx*PX,y=ay+ky*PY;if(inImg(Math.round(x),Math.round(y))&&free(x,y)&&(art(x,y)||rOK(x,y)))have.set(key(kx,ky),[x,y]);}
+    // grow outward while the next cell looks like a card with the same border
+    if(grp.length>=3){let grew=true,guard=0;while(grew&&guard++<40){grew=false;
+      for(const k of [...have.keys()]){const [kx,ky]=k.split(',').map(Number);
+        for(const [ddx,ddy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nk=key(kx+ddx,ky+ddy);if(have.has(nk))continue;const x=ax+(kx+ddx)*PX,y=ay+(ky+ddy)*PY;
+          if(inImg(Math.round(x),Math.round(y))&&free(x,y)&&rOK(x,y)&&art(x,y)&&(solidOK(x,y)||rTight(x,y))){have.set(nk,[x,y]);grew=true;}}}}}
+    have.forEach(v=>out.push(v));
   });
   out.sort((a,b)=>Math.abs(a[1]-b[1])>h*.4?a[1]-b[1]:a[0]-b[0]);
   return out.map(([x,y])=>[Math.max(0,x)/S,Math.max(0,y)/S,w/S,h/S]);

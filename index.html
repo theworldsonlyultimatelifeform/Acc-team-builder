@@ -1350,7 +1350,6 @@ function buildCounter(mode,used){
     const s=sg||(i===0&&ranked.find(x=>ok(x)&&tags(x).includes('surv')))||ranked.find(ok);
     if(s){p.s=s;taken.add(s.name);capsOf(findDb(s)).forEach(k=>{if(k in need)covered[k]=1;});}
   });
-  pairs=metaFix(pairs,mode);
   // Princess of Light blocks heals (12x) and revives (4x) on or off the field: the hardest revive/heal counter. Always last.
   let tip='';const tgt=mode.id==='counter'?capsOf(DB.find(x=>x.n===(state.target||'Divine Emperor')&&x.kind==='atk')):new Set();
   if(mode.id==='antirev'||tgt.has('revive')||tgt.has('heal')){
@@ -1360,6 +1359,7 @@ function buildCounter(mode,used){
       else if(!pol)tip='Princess of Light is the best answer to revives and heals. Put her in your last slot once you have her.';}
     if(i>=0&&i!==pairs.length-1){const [x]=pairs.splice(i,1);pairs.push(x);}
   }
+  pairs=metaFix(pairs,mode);
   pairs.forEach(p=>{const c=new Set([...capsOf(findDb(p.a)),...(p.s?capsOf(findDb(p.s)):[])]);const l=Object.keys(need).filter(k=>c.has(k)).map(k=>CAPS[k][0]);p.cn=l.join(', ');});
   let dmg=0,hp=0,est=false;pairs.forEach(p=>{const s=effStats(p.a);dmg+=s.dmg;hp+=s.hp;est=est||!!s.est;});
   pairs.forEach(p=>[...capsOf(findDb(p.a)),...(p.s?capsOf(findDb(p.s)):[])].forEach(k=>{if(k in need)covered[k]=1;}));

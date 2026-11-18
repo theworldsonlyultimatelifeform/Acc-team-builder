@@ -1251,7 +1251,7 @@ const MODES=[
 ];
 function supScore(e,mode){
   if(SUP_ZERO.has(e.name))return 0.01;let s=e.custom?(SUP_SCORE[e.tier]??30):(SUP_SCORE[tierOf(e)]??30);
-  tags(e).forEach(g=>{if(g in mode.sup)s*=mode.sup[g];});
+  const W=mode.sup||{};tags(e).forEach(g=>{if(g in W)s*=W[g];});
   if(mode.ranked&&!e.custom&&!META_USED.has(e.name))s*=.6;
   return s;
 }

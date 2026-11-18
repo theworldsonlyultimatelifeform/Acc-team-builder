@@ -270,9 +270,10 @@ h1,h2,.disp{font-family:Rubik,system-ui,sans-serif;font-weight:800}
       <p class="mut" id="refCount" style="margin:10px 0 0"></p>
     </div>
     <div class="card" id="gridBox" style="display:none">
-      <div class="row"><h3 style="flex:1;margin:0">Line up the grid</h3><span class="mut" id="shotNum"></span></div>
-      <p class="mut" style="margin:4px 0 0">Move the sliders until each purple box covers one card. The site remembers this for next time.</p>
+      <div class="row"><h3 style="flex:1;margin:0">Cards found</h3><span class="mut" id="shotNum"></span></div>
+      <p class="mut" id="gridMsg" style="margin:4px 0 0">Each card the site found has a purple box. Tap Find cards to name them.</p>
       <div class="cvWrap"><canvas id="gridCv"></canvas></div>
+      <label class="mut" style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="manualGrid"> Boxes look wrong? Line them up by hand</label>
       <div id="sliders"></div>
       <div class="row" style="margin-top:10px"><button class="btn" id="prevShot">◀</button><button class="btn" id="nextShot">▶</button><button class="btn pri" id="detectBtn" style="margin-left:auto">Find cards</button></div>
     </div>
@@ -1397,6 +1398,69 @@ function rarityGuess(x,sx,sy,sw,sh){
   return 'Basic';
 }
 
+// Automatic card-box finder: separates cards from the dark background, keeps the card-shaped blobs,
+// works out the grid spacing, then fills in any card it missed inside each grid.
+function autoCells(src){
+  const S=Math.min(1,900/src.width),W=Math.max(1,Math.round(src.width*S)),H=Math.max(1,Math.round(src.height*S));
+  const c=document.createElement('canvas');c.width=W;c.height=H;const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(src,0,0,W,H);
+  const px=cx.getImageData(0,0,W,H).data,N=W*H,mx=new Uint8Array(N);
+  for(let i=0,j=0;i<N;i++,j+=4)mx[i]=Math.max(px[j],px[j+1],px[j+2]);
+  const TH=70,lab=new Int32Array(N),stack=new Int32Array(N);
+  function label(mask){lab.fill(0);let n=0;const sz=[0],bb=[null];
+    for(let s=0;s<N;s++){if(!mask(s)||lab[s])continue;n++;let sp=0,cnt=0,x0=W,y0=H,x1=0,y1=0;stack[sp++]=s;lab[s]=n;
+      while(sp){const p=stack[--sp];cnt++;const x=p%W,y=(p-x)/W;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;
+        if(x>0){const q=p-1;if(!lab[q]&&mask(q)){lab[q]=n;stack[sp++]=q;}}
+        if(x<W-1){const q=p+1;if(!lab[q]&&mask(q)){lab[q]=n;stack[sp++]=q;}}
+        if(y>0){const q=p-W;if(!lab[q]&&mask(q)){lab[q]=n;stack[sp++]=q;}}
+        if(y<H-1){const q=p+W;if(!lab[q]&&mask(q)){lab[q]=n;stack[sp++]=q;}}}
+      sz.push(cnt);bb.push([x0,y0,x1-x0+1,y1-y0+1]);}
+    return {n,sz,bb};}
+  const d=label(p=>mx[p]<TH),bg=new Uint8Array(N);
+  for(let p=0;p<N;p++){const l=lab[p];if(l&&d.sz[l]>N*.01)bg[p]=1;}
+  const f=label(p=>!bg[p]);
+  let B=[];for(let i=1;i<=f.n;i++){const [x,y,w,h]=f.bb[i];if(w<W*.03||h<W*.03||w>W*.4)continue;if(f.sz[i]/(w*h)<.85)continue;const r=h/w;if(r<.7||r>1.6)continue;B.push([x,y,w,h]);}
+  if(!B.length)return [];
+  const med=a=>{const s=[...a].sort((p,q)=>p-q);return s[s.length>>1];};
+  let bi=0,bc=-1;B.forEach((b,i)=>{const c=B.filter(o=>Math.abs(o[2]-b[2])<b[2]*.1&&Math.abs(o[3]-b[3])<b[3]*.1).length;if(c>bc){bc=c;bi=i;}});
+  const G=B.filter(o=>Math.abs(o[2]-B[bi][2])<B[bi][2]*.12&&Math.abs(o[3]-B[bi][3])<B[bi][3]*.12);
+  const w=med(G.map(g=>g[2])),h=med(G.map(g=>g[3]));
+  const dxs=[],dys=[];G.forEach(g=>G.forEach(k=>{if(Math.abs(k[1]-g[1])<h*.2&&k[0]-g[0]>w*.85&&k[0]-g[0]<w*1.6)dxs.push(k[0]-g[0]);if(Math.abs(k[0]-g[0])<w*.2&&k[1]-g[1]>h*.85&&k[1]-g[1]<h*1.6)dys.push(k[1]-g[1]);}));
+  const PX=dxs.length?med(dxs):w*1.12,PY=dys.length?med(dys):(PX-w)+h;
+  const inImg=(x,y)=>x>=0&&y>=0&&x+w<=W&&y+h<=H;
+  const at=(x,y)=>mx[y*W+x];
+  function art(x,y){x=Math.round(x);y=Math.round(y);if(!inImg(x,y))return false;let s=0,s2=0,n=0;
+    for(let yy=y+(h/5|0);yy<y+(4*h/5|0);yy+=2)for(let xx=x+(w/5|0);xx<x+(4*w/5|0);xx+=2){const v=at(xx,yy);s+=v;s2+=v*v;n++;}
+    const m=s/n;return Math.sqrt(Math.max(0,s2/n-m*m))>12&&m>40;}
+  function ring(x,y){x=Math.round(x);y=Math.round(y);if(!inImg(x,y))return null;const r=Math.max(2,w/40|0);let R=0,Gc=0,Bc=0,n=0;
+    const add=(xx,yy)=>{const j=(yy*W+xx)*4;R+=px[j];Gc+=px[j+1];Bc+=px[j+2];n++;};
+    for(let k=1;k<=r;k++){for(let xx=x+(w/5|0);xx<x+(4*w/5|0);xx++){add(xx,y+k);add(xx,y+h-1-k);}for(let yy=y+(h/5|0);yy<y+(4*h/5|0);yy++){add(x+k,yy);add(x+w-1-k,yy);}}
+    return [R/n,Gc/n,Bc/n];}
+  function edge(x,y){x=Math.round(x);y=Math.round(y);if(x<-w*.02||y<-h*.02||x+w>W+w*.02||y+h>H+h*.02)return false;x=Math.max(0,Math.min(x,W-w));y=Math.max(0,Math.min(y,H-h));
+    const r=Math.max(2,w/40|0);let ib=0,in_=0,od=0,on=0;
+    const I=(xx,yy)=>{in_++;if(at(xx,yy)>TH)ib++;},O=(xx,yy)=>{on++;if(at(xx,yy)<TH)od++;};
+    for(let k=r;k<2*r;k++){for(let xx=x+(w/4|0);xx<x+(3*w/4|0);xx++){I(xx,y+k);I(xx,y+h-1-k);if(y-1-k>=0)O(xx,y-1-k);if(y+h+k<H)O(xx,y+h+k);}
+      for(let yy=y+(h/4|0);yy<y+(3*h/4|0);yy++){I(x+k,yy);I(x+w-1-k,yy);if(x-1-k>=0)O(x-1-k,yy);if(x+w+k<W)O(x+w+k,yy);}}
+    return ib/in_>.55&&on>0&&od/on>.55;}
+  // group boxes that sit on the same grid
+  const par=G.map((_,i)=>i),fd=i=>{while(par[i]!==i){par[i]=par[par[i]];i=par[i];}return i;};
+  for(let i=0;i<G.length;i++)for(let j=i+1;j<G.length;j++){const a=(G[j][0]-G[i][0])/PX,b=(G[j][1]-G[i][1])/PY;if(Math.abs(a-Math.round(a))<.12&&Math.abs(b-Math.round(b))<.12)par[fd(i)]=fd(j);}
+  const groups={};G.forEach((g,i)=>(groups[fd(i)]=groups[fd(i)]||[]).push(g));
+  const gl=Object.values(groups),big=Math.max(...gl.map(g=>g.length)),out=[];
+  gl.forEach(grp=>{
+    if(grp.length<2&&big>=3)return;
+    const [ax,ay]=grp[0],rs=grp.map(g=>ring(g[0],g[1])).filter(Boolean);
+    const RC=[0,1,2].map(k=>med(rs.map(r=>r[k])));
+    const rOK=(x,y)=>{const r=ring(x,y);return r&&(Math.abs(r[0]-RC[0])+Math.abs(r[1]-RC[1])+Math.abs(r[2]-RC[2]))/3<30;};
+    const ks=grp.map(g=>[Math.round((g[0]-ax)/PX),Math.round((g[1]-ay)/PY)]);
+    const k0=Math.min(...ks.map(k=>k[0])),k1=Math.max(...ks.map(k=>k[0])),l0=Math.min(...ks.map(k=>k[1])),l1=Math.max(...ks.map(k=>k[1]));
+    for(let ky=l0-1;ky<=l1+1;ky++)for(let kx=k0-1;kx<=k1+1;kx++){
+      const i=ks.findIndex(k=>k[0]===kx&&k[1]===ky);if(i>=0){out.push([grp[i][0],grp[i][1]]);continue;}
+      const x=ax+kx*PX,y=ay+ky*PY,inside=kx>=k0&&kx<=k1&&ky>=l0&&ky<=l1;
+      if(inside?(art(x,y)||rOK(x,y))&&inImg(Math.round(x),Math.round(y)):(grp.length>=3&&edge(x,y)&&art(x,y)&&rOK(x,y)))out.push([x,y]);}
+  });
+  out.sort((a,b)=>Math.abs(a[1]-b[1])>h*.4?a[1]-b[1]:a[0]-b[0]);
+  return out.map(([x,y])=>[Math.max(0,x)/S,Math.max(0,y)/S,w/S,h/S]);
+}
 let shots=[],shotI=0,scanResults=null,unmatched=[];
 const GRID_F=[['cols','Columns',1,12,1],['rows','Rows',1,12,1],['l','Left edge %',0,45,.5],['t','Top edge %',0,70,.5],['r','Right edge %',0,45,.5],['b','Bottom edge %',0,70,.5],['gap','Gap %',0,10,.25]];
 function renderSliders(){
@@ -1404,6 +1468,7 @@ function renderSliders(){
   $('#sliders').querySelectorAll('input').forEach(i=>{i.oninput=()=>{state.grid[i.dataset.k]=+i.value;i.nextElementSibling.textContent=i.value;drawGrid();};i.onchange=save;});
 }
 function cells(sh){
+  if(!state.manualGrid&&sh.auto&&sh.auto.length)return sh.auto;
   const g=state.grid,W=sh.cv.width,H=sh.cv.height,x0=W*g.l/100,y0=H*g.t/100,x1=W*(1-g.r/100),y1=H*(1-g.b/100),gp=W*g.gap/100;
   const cw=(x1-x0-gp*(g.cols-1))/g.cols,ch=(y1-y0-gp*(g.rows-1))/g.rows,out=[];
   if(cw<4||ch<4)return out;
@@ -1415,7 +1480,7 @@ function drawGrid(){
   cv.width=sh.cv.width;cv.height=sh.cv.height;x.drawImage(sh.cv,0,0);
   x.lineWidth=Math.max(2,sh.cv.width/300);x.strokeStyle='#a879ff';x.fillStyle='rgba(168,121,255,.12)';
   cells(sh).forEach(([a,b,w,h])=>{x.fillRect(a,b,w,h);x.strokeRect(a,b,w,h);});
-  $('#shotNum').textContent=shots.length>1?`Screenshot ${shotI+1} of ${shots.length}`:'';
+  $('#shotNum').textContent=(shots.length>1?`Screenshot ${shotI+1} of ${shots.length} · `:'')+`${cells(sh).length} cards found`;
   $('#prevShot').style.display=$('#nextShot').style.display=shots.length>1?'':'none';
 }
 $('#scanBtn').onclick=()=>$('#scanIn').click();
@@ -1424,11 +1489,16 @@ $('#scanIn').onchange=async ev=>{
   shots=[];
   for(const f of files){try{const im=await loadImg(f);const sc=Math.min(1,1600/im.naturalWidth);const cv=document.createElement('canvas');cv.width=Math.round(im.naturalWidth*sc);cv.height=Math.round(im.naturalHeight*sc);cv.getContext('2d',{willReadFrequently:true}).drawImage(im,0,0,cv.width,cv.height);shots.push({cv});URL.revokeObjectURL(im.src);}catch(e){toast('Couldn’t read one of the images');}}
   if(!shots.length)return;
-  shotI=0;scanResults=null;$('#gridBox').style.display='';$('#reviewBox').innerHTML='';renderSliders();drawGrid();
+  shots.forEach(sh=>{try{sh.auto=autoCells(sh.cv);}catch(e){sh.auto=[];}});
+  shotI=0;scanResults=null;$('#gridBox').style.display='';$('#reviewBox').innerHTML='';renderSliders();gridUI();drawGrid();
   $('#gridBox').scrollIntoView({behavior:'smooth'});
 };
-$('#prevShot').onclick=()=>{shotI=(shotI-1+shots.length)%shots.length;drawGrid();};
-$('#nextShot').onclick=()=>{shotI=(shotI+1)%shots.length;drawGrid();};
+function gridUI(){const sh=shots[shotI],none=!sh||!sh.auto||!sh.auto.length;const man=state.manualGrid||none;
+  $('#manualGrid').checked=man;$('#manualGrid').disabled=none;$('#sliders').style.display=man?'':'none';
+  $('#gridMsg').textContent=none?'The site couldn’t find the cards in this picture by itself. Move the sliders until each purple box covers one card.':man?'Move the sliders until each purple box covers one card. The site remembers this for next time.':'Each card the site found has a purple box. Tap Find cards to name them.';}
+$('#manualGrid').onchange=e=>{state.manualGrid=e.target.checked;save();gridUI();drawGrid();};
+$('#prevShot').onclick=()=>{shotI=(shotI-1+shots.length)%shots.length;gridUI();drawGrid();};
+$('#nextShot').onclick=()=>{shotI=(shotI+1)%shots.length;gridUI();drawGrid();};
 
 async function allRefs(){
   const list=[];

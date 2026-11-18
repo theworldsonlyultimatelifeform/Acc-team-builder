@@ -219,6 +219,7 @@ h1,h2,.disp{font-family:Rubik,system-ui,sans-serif;font-weight:800}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,700;0,800;1,800&display=swap">
 <script src="refs.js"></script>
+<script src="ab.js"></script>
 </head>
 <body>
 <header>
@@ -916,7 +917,7 @@ function vMult(e){return Math.pow(4,Math.max(0,VARIANTS.indexOf(e.variant)));}
 function trait(e){return TRAITS.find(t=>t.n===e.trait)||TRAITS[0];}
 function effStats(e){const [b,est]=baseDmg(e);const t=trait(e);const m=vMult(e);return {dmg:b*m*(1+t.dmg/100),hp:b*2*m*(1+t.hp/100),est};}
 function tierOf(e){if(e.custom)return e.tier;const d=findDb(e);return d?d.t:'';}
-function atkScore(e){const s=effStats(e);const t=tierOf(e);const d=findDb(e);const raid=d&&d.grp===G.RAID&&!TIER_MULT[t]?1.3:1;return Math.sqrt(s.dmg*s.hp)*(TIER_MULT[t]||1)*raid*extraMult(e)*(trait(e).sc||1);}
+function atkScore(e){const s=effStats(e);const t=tierOf(e);const d=findDb(e);const A=d&&window.AB&&AB[d.n];const raid=A?(.85+A[0]/200):(d&&d.grp===G.RAID&&!TIER_MULT[t]?1.3:1);return Math.sqrt(s.dmg*s.hp)*(TIER_MULT[t]||1)*raid*extraMult(e)*(trait(e).sc||1);}
 function tags(e){const d=findDb(e);return (d&&d.g)||[];}
 // ---------- SUMMONS / FUSIONS / UNOBTAINABLE ----------
 const BO=A.filter(c=>c.bo);
@@ -933,7 +934,7 @@ function skipNote(m){const names=[...new Set(state.owned.filter(e=>e.kind==='atk
 const SCALED={Balanced:{dmg:10000,hp:20000},Attack:{dmg:16000,hp:12500},Sustain:{dmg:6700,hp:27500}};
 function isLimited(e){const d=findDb(e);return !!(d&&d.grp===G.LMOON);}
 function uniq(arr,on){if(!on)return arr;const seen=new Set();return arr.filter(e=>{if(seen.has(e.name))return false;seen.add(e.name);return true;});}
-function scaledScore(e){const [b]=baseDmg(e);const d=findDb(e)||{};return (1+Math.log10(Math.max(b,10)))*(TIER_MULT[tierOf(e)]||1)*extraMult(e)*((d.d||'').length>200?1.1:1);}
+function scaledScore(e){const [b]=baseDmg(e);const d=findDb(e)||{};return (1+Math.log10(Math.max(b,10)))*(TIER_MULT[tierOf(e)]||1)*extraMult(e)*(window.AB&&AB[d.n]?(.6+AB[d.n][1]/100):((d.d||'').length>200?1.1:1));}
 function styleFor(e){const d=findDb(e)||{};const x=((d.an||'')+' '+(d.d||'')).toLowerCase();if(/counter|reflect|absorb|heal|shield|revive|damage reduction|block/.test(x)&&!/execute|crit/.test(x))return 'Sustain';if(/execute|crit|overkill|pierc|follow[- ]up|times for|strikes/.test(x))return 'Attack';return 'Balanced';}
 function extraMult(e){if(e.custom)return 1;const d=findDb(e);if(!d)return 1;let sm=0,tr=0,fu=0;const b=d.dmg||EST_DMG[d.t]||150;
  BO.forEach(s=>{if(!(s.by||[]).includes(d.n))return;
@@ -1004,6 +1005,7 @@ $('#homeForm').addEventListener('submit',ev=>{ev.preventDefault();$('#q').value=
 
 // ---------- CARD PAGE ----------
 let cardD=null,cardV='Basic';
+function abRating(d){const A=d&&d.kind==='atk'&&window.AB&&AB[d.n];if(!A)return '';return `<div class="note" style="margin:10px 0 0"><b>Ability rating ${A[0]}/100</b> · Scaled Mode ${A[1]}/100${A[2]?`<br>${esc(A[2])}`:''}</div>`;}
 function showCard(d){if(!d)return;cardD=d;cardV='Basic';showTab('card');}
 function teamsWith(d){const out=[];MODES.forEach(m=>{if(m.exclude)return;try{const t=buildTeam(m,new Set());t.slots.forEach((s,i)=>{if((d.kind==='atk'&&s.a&&s.a.name===d.n)||(d.kind==='sup'&&s.s&&s.s.name===d.n))out.push({m,i,s});});}catch(e){}});return out;}
 function renderCard(){
@@ -1024,6 +1026,7 @@ function renderCard(){
   if(!d.bo)h+=`<div class="stickyAdd"><button class="btn pri" id="cardAdd">${owned.length?'Add another copy':'Add to my cards'}</button></div>`;
   h+='</div><div class="cRight">';
   h+=(d.an||d.d)?`<div class="ab">${d.an?`<b>${esc(d.an)}</b>`:''}${d.d?esc(d.d):'<span class="mut">Ability text not added yet.</span>'}</div>`:'<div class="ab"><span class="mut">Ability not added yet.</span></div>';
+  h+=abRating(d);
   h+=`<h2>Skins</h2>`+(skins.length?`<div class="skinRow">${skins.map(r=>`<figure><img src="${r.th}" alt="${esc(d.n)} ${esc(r.skin||'base')}"><figcaption>${r.skin&&r.skin!=='base'?esc(r.skin):'Base'}</figcaption></figure>`).join('')}</div>`:'<p class="mut" style="margin:0">No skin pictures added yet.</p>');
   if(where)h+=`<div class="src" style="display:block;margin-top:14px;padding:10px 12px;font-size:13px">How to get: ${esc(where)}</div>`;
   h+=boInfo(d);

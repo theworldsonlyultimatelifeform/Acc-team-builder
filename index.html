@@ -1338,7 +1338,7 @@ function buildCounter(mode,used){
   }
   // supports: cover the needs the attackers left open, then survival
   const sp=supPool().filter(e=>!used.has(e.id)&&!SUP_ZERO.has(e.name)&&!tags(e).includes('fall'));
-  const sv=e=>{const c=capsOf(findDb(e));let g=0;for(const k in need)if(c.has(k))g+=need[k]*(covered[k]?.4:1);return (SUP_SCORE[tierOf(e)]??30)/100+.5*g;};
+  const sv=e=>{const c=capsOf(findDb(e));let g=0;for(const k in need)if(c.has(k))g+=need[k]*(covered[k]?.4:1);return ((SUP_SCORE[tierOf(e)]??30)/100+.5*g)*(META_USED.has(e.name)?1:.6);};
   let pairs=placeOrder(picks.map(a=>({a,s:null})));
   // cards immune to outside damage reduction get no use from shield/damage-cut supports
   const noDR=p=>/immune to (any )?(dmg|damage) reduction from outside/i.test((findDb(p.a)||{}).d||'');

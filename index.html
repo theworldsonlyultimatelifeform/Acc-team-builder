@@ -989,7 +989,7 @@ document.addEventListener('click',ev=>{
 });
 
 // ---------- HOME ----------
-const MODE_COLOR={best:'#a879ff',boss:'#5fd39a',any:'#ff6b81',scaled:'#f5c451',backup:'#5bb8ff'};
+const MODE_COLOR={best:'#a879ff',boss:'#5fd39a',any:'#ff6b81',scaled:'#f5c451',counter:'#ff9f43',antiaoe:'#2dd4bf',antirev:'#e879f9',allround:'#94a3b8',backup:'#5bb8ff'};
 function artFor(d,own){
   const o=own||state.owned.find(x=>x.name===d.n&&x.kind===d.kind&&x.img);
   if(o&&o.img)return `<img src="${o.img}" alt="">`;
@@ -1189,6 +1189,10 @@ const MODES=[
  {id:'boss',name:'Boss & raid fights',desc:'For one tough enemy. Skips supports that need several enemies and leans on survival and damage.',sup:{multi:0,surv:1.2,dmg:1.15}},
  {id:'any',name:'Ranked · Any Mode',desc:'Ranked with your real stats and traits. No duplicate cards, and Cosmic Villain is banned. Favors survival and supports that shut down enemy abilities.',sup:{surv:1.25,ctrl:1.2,multi:1.1},ranked:1,ban:['Cosmic Villain']},
  {id:'scaled',name:'Ranked · Scaled Mode',desc:'Every card’s stats are reset by play style (Balanced 20K HP / 10K DMG, Attack 12.5K / 16K, Sustain 27.5K / 6.7K) and traits are off, so abilities decide. No duplicates; banned and limited cards are skipped.',sup:{surv:1.2,ctrl:1.25,multi:1.1},ranked:1,scaled:1,noLimited:1,ban:['Lunar Guardian','Sun Lion','Cosmic Villain','Titania','Combat Giant','The Almighty','Dimensional Manipulator','Heavenly Creation','Ascended Golden Vampire']},
+ {id:'counter',name:'Counter a card',desc:'Pick a card you keep losing to. This team brings the abilities that beat what it relies on.',counter:1,ranked:1,ban:['Cosmic Villain']},
+ {id:'antiaoe',name:'Anti-AOE',desc:'Built to survive decks that hit your whole team: protects off-field cards, cuts damage and has second lives.',counter:1,ranked:1,ban:['Cosmic Villain']},
+ {id:'antirev',name:'Anti-revive',desc:'For decks full of revives and second lives: stops revives and healing, executes and shuts down abilities.',counter:1,ranked:1,ban:['Cosmic Villain']},
+ {id:'allround',name:'All-rounder',desc:'Good against anything, and especially strong against decks with fewer meta cards: big stats plus hits on many enemies, executes and survival.',counter:1,ranked:1,ban:['Cosmic Villain']},
  {id:'backup',name:'Backup team',desc:'Your best team without the cards used in Best overall, so you have a second deck ready.',sup:{},exclude:'best'},
 ];
 function supScore(e,mode){
@@ -1228,6 +1232,77 @@ function tile(e,i,cap){
   return `<div class="tile b-${v}" title="${esc(e.name)}">${i!=null?`<span class="no">${i}</span>`:''}<div class="art">${e.img?`<img src="${e.img}" alt="${esc(e.name)}">`:esc(initials(e.name))}</div>${cap?`<span class="cap">${cap}</span>`:''}</div>`;
 }
 function animeOf(e){const d=findDb(e);return d&&d.kind==='atk'&&d.a?d.a:'';}
+// ---------- COUNTER TEAMS ----------
+// What each card can do, read from its ability text
+const CAPS={
+ dis:['shuts down abilities',/disabl|\bseal|negates? enemy support|cancels enemy abilit|lose their ability|abilities and supports|can.t act/],
+ antirev:['stops revives',/can.t revive|cannot revive|block\w* (enemy )?(heals? or )?revive|revives? .{0,20}blocked|kills .{0,20}can.t revive/],
+ antiheal:['stops healing',/can.t heal|no healing|cannot heal|block\w* (enemy )?heal|nullif\w* (enemy )?heal|halves its healing|steal\w* .{0,20}heal/],
+ exe:['executes',/execut|instantly defeat|cut down instantly|struck down|clawed instantly|devours? enemies at 0/],
+ prot:['protects off-field allies',/off-field all|damage to off-field|protects? off-field|take hits (meant )?for allies|redirects? \d+% of damage dealt to allies|intercept/],
+ dr:['damage reduction',/damage reduction|less damage|absorbs? \d+% of (damage|incoming)|shield|barrier|caps incoming|takes? \d+% less/],
+ aoe:['hits many enemies',/all enemies|enemy party|whole enemy|every enemy|pierc|off-field enem|first \d enemies|\d enemies/],
+ truedmg:['ignores defences',/undodgeable|unblockable|can.t be (dodged|blocked)|ignor\w* (\w+ )?(dodge|block|shield|damage reduction|barrier)|true damage|destroys? all enemy damage reduction|shatter/],
+ imm:['ignores disables',/immun|ignores? (any )?(applicable )?(skill )?disable|ignores disable|cleans|cancels attempts to disable|cancels? (the )?stun|status immunity/],
+ strip:['strips enemy buffs',/strips?|cancels? enemy stat boosts|invert|removes? .{0,15}bonus|destroys? buffs|lose all buffs|steals? .{0,25}(damage|stats|attack)/],
+ cc:['stuns or freezes',/stun|freez|skip|sleep|imprison|bind/],
+ dodge:['dodges',/dodge|miss chance|chance to miss/],
+ revive:['revives',/revive|survives? (its|the) first fatal|negates? (its|the) first fatal|fatal (hit|blow)/],
+ heal:['heals',/heal|lifesteal/],
+ scale:['scales up',/stack|permanently gain|absorb\w* .{0,20}stats|steal|gains? damage equal|\+\d+% base/],
+ summon:['summons',/summon|clone/],
+};
+const capCache={};
+function capsOf(d){if(!d)return new Set();if(capCache[d.n+d.kind])return capCache[d.n+d.kind];const t=((d.an||'')+'. '+(d.d||'')).toLowerCase();const s=new Set();for(const k in CAPS)if(CAPS[k][1].test(t))s.add(k);capCache[d.n+d.kind]=s;return s;}
+// What beats what the threat relies on
+const ANSWERS={revive:['antirev','exe','dis'],dodge:['truedmg','cc'],dr:['truedmg','strip','dis'],aoe:['prot','dr','revive'],heal:['antiheal','exe'],scale:['strip','exe','dis'],dis:['imm'],cc:['imm'],summon:['aoe'],prot:['aoe','truedmg'],imm:['exe','truedmg'],exe:['revive','dr']};
+function needsFor(mode){
+  if(mode.id==='counter'){const d=DB.find(x=>x.n===(state.target||'Divine Emperor')&&x.kind==='atk');const w={dis:1};capsOf(d).forEach(c=>(ANSWERS[c]||[]).forEach((a,i)=>{w[a]=Math.max(w[a]||0,i?1.5:2);}));return w;}
+  if(mode.id==='antiaoe')return {prot:3,dr:2,revive:1.5,imm:1,heal:.8};
+  if(mode.id==='antirev')return {antirev:3,exe:2.5,dis:2,antiheal:1.5,strip:1};
+  return {aoe:1.2,exe:1,dis:1,revive:1,dr:.8,truedmg:.8,imm:.6,scale:.6};   // all-rounder
+}
+function placeOrder(pairs){ // entry disablers lead, cards that must be played last go last
+  const t=p=>{const d=findDb(p.a)||{};const x=(d.d||'').toLowerCase();return /played last|last card|last in the party/.test(x)?2:(/on (entry|battle start)/.test(x)&&capsOf(d).has('dis')?0:1);};
+  return pairs.map((p,i)=>[p,i]).sort((a,b)=>t(a[0])-t(b[0])||a[1]-b[1]).map(x=>x[0]);
+}
+function buildCounter(mode,used){
+  const n=state.size,need=needsFor(mode);
+  const okA=e=>!(mode.ban||[]).includes(e.name);
+  const cand=uniq(pool().filter(e=>e.kind==='atk'&&!used.has(e.id)&&!isBO(e)&&okA(e)).sort((a,b)=>atkScore(b)-atkScore(a)),true).slice(0,60);
+  if(!cand.length)return {slots:[],dmg:0,hp:0,est:false};
+  const top=atkScore(cand[0])||1,covered={},picks=[];
+  const gain=(caps)=>{let g=0;for(const k in need)if(caps.has(k))g+=need[k]*(covered[k]?.35:1);return g;};
+  while(picks.length<n&&picks.length<cand.length){
+    let best=null,bv=-1;
+    for(const e of cand){if(picks.includes(e))continue;const c=capsOf(findDb(e));const v=atkScore(e)/top*(mode.id==='allround'?1.6:1)+.22*gain(c);if(v>bv){bv=v;best=e;}}
+    picks.push(best);capsOf(findDb(best)).forEach(k=>{if(k in need)covered[k]=1;});
+  }
+  // supports: cover the needs the attackers left open, then survival
+  const sp=supPool().filter(e=>!used.has(e.id)&&!SUP_ZERO.has(e.name)&&!tags(e).includes('fall'));
+  const sv=e=>{const c=capsOf(findDb(e));let g=0;for(const k in need)if(c.has(k))g+=need[k]*(covered[k]?.4:1);return (SUP_SCORE[tierOf(e)]??30)/100+.5*g;};
+  let pairs=placeOrder(picks.map(a=>({a,s:null})));
+  // cards immune to outside damage reduction get no use from shield/damage-cut supports
+  const noDR=p=>/immune to (any )?(dmg|damage) reduction from outside/i.test((findDb(p.a)||{}).d||'');
+  const isDR=s=>capsOf(findDb(s)).has('dr')||['Black Slime','Mech Contract','Limitless','Heart of The Cards','Red Thorn'].includes(s.name);
+  const ranked=sp.slice().sort((a,b)=>sv(b)-sv(a)),taken=new Set();
+  pairs.slice().sort((x,y)=>atkScore(y.a)-atkScore(x.a)).forEach((p,i)=>{
+    const ok=s=>!taken.has(s.name)&&!(noDR(p)&&isDR(s));
+    const s=(i===0&&ranked.find(x=>ok(x)&&tags(x).includes('surv')))||ranked.find(ok);
+    if(s){p.s=s;taken.add(s.name);capsOf(findDb(s)).forEach(k=>{if(k in need)covered[k]=1;});}
+  });
+  pairs.forEach(p=>{const c=new Set([...capsOf(findDb(p.a)),...(p.s?capsOf(findDb(p.s)):[])]);const l=Object.keys(need).filter(k=>c.has(k)).map(k=>CAPS[k][0]);p.cn=l.join(', ');});
+  let dmg=0,hp=0,est=false;pairs.forEach(p=>{const s=effStats(p.a);dmg+=s.dmg;hp+=s.hp;est=est||!!s.est;});
+  const missing=Object.keys(need).filter(k=>need[k]>=1.5&&!covered[k]).map(k=>CAPS[k][0]);
+  return {slots:pairs,dmg,hp,est,missing};
+}
+function targetPicker(){
+  const list=DB.filter(d=>d.kind==='atk'&&!d.bo&&d.d).sort((a,b)=>a.n.localeCompare(b.n));
+  const cur=state.target||'Divine Emperor',d=DB.find(x=>x.n===cur&&x.kind==='atk');
+  const relies=[...capsOf(d)].filter(k=>ANSWERS[k]).map(k=>CAPS[k][0]);
+  return `<label class="mut" style="display:block;margin:4px 0">Card to beat</label><select onchange="state.target=this.value;save();renderTeams()">${list.map(x=>`<option ${x.n===cur?'selected':''}>${esc(x.n)}</option>`).join('')}</select>${relies.length?`<p class="note" style="margin:6px 0 8px">${esc(cur)} relies on: ${esc(relies.join(', '))}.</p>`:''}`;
+}
+
 function renderTeams(){
   const out=$('#teams');
   const nA=pool().filter(e=>e.kind==='atk').length,nS=state.owned.filter(e=>e.kind==='sup').length;
@@ -1236,13 +1311,13 @@ function renderTeams(){
   MODES.forEach(m=>{
     const used=new Set();
     if(m.exclude&&results[m.exclude]) results[m.exclude].slots.forEach(s=>{used.add(s.a.id);if(s.s)used.add(s.s.id);});
-    const t=buildTeam(m,used);results[m.id]=t;
+    const t=m.counter?buildCounter(m,used):buildTeam(m,used);results[m.id]=t;
     if(state.mode&&state.mode!=='all'&&m.id!==state.mode)return;
     if(m.id==='backup'&&!t.slots.length){html+=`<div class="card team"><h3>${m.name}</h3><p class="mut" style="margin:0">Add more attackers to get a second team.</p></div>`;return;}
-    html+=`<div class="card team"><h3>${m.name}</h3><p class="stats" style="margin:0 0 4px">Team <b>DMG ${fmt(t.dmg)}</b> · <b>HP ${fmt(t.hp)}</b>${t.est?' <span class="est">includes est.</span>':''}</p><p class="mut" style="margin:0 0 6px">${m.desc}</p>${skipNote(m)}`;
+    html+=`<div class="card team"><h3>${m.name}</h3><p class="stats" style="margin:0 0 4px">Team <b>DMG ${fmt(t.dmg)}</b> · <b>HP ${fmt(t.hp)}</b>${t.est?' <span class="est">includes est.</span>':''}</p><p class="mut" style="margin:0 0 6px">${m.desc}</p>${m.id==='counter'?targetPicker():''}${skipNote(m)}${t.missing&&t.missing.length?`<p class="note" style="margin:0 0 6px">Your cards can’t cover: ${esc(t.missing.join(', '))}.</p>`:''}`;
     const sl=t.slots;
     html+=`<div class="deckWrap"><div class="deck"><div class="deckCol sup"><div class="deckHd">Support</div>${sl.map(s=>tile(s.s,null,s.s?(tierOf(s.s)||''):'')).join('')}</div><div class="deckCol atk"><div class="deckHd">Attack</div>${sl.map((s,i)=>{const st=s.st||effStats(s.a);return tile(s.a,i+1,fmt(st.dmg)+(st.est?'*':''));}).join('')}</div></div>
-    <div class="deckInfo">${sl.map((s,i)=>{const an=animeOf(s.a),w=whyFor(s.s,i);return `<div class="di"><div class="t">${i+1}. ${label(s.a)}</div>${an?`<div class="an">${esc(an)}</div>`:''}${s.style?`<div class="why keep">Play style: <b>${s.style}</b></div>`:''}${teamNotes(s.a,sl)}<div class="s">${s.s?'Support: '+esc(s.s.name):'No support left for this card'}</div>${w?`<div class="why">${esc(w)}</div>`:''}</div>`;}).join('')}</div></div>
+    <div class="deckInfo">${sl.map((s,i)=>{const an=animeOf(s.a),w=whyFor(s.s,i);return `<div class="di"><div class="t">${i+1}. ${label(s.a)}</div>${an?`<div class="an">${esc(an)}</div>`:''}${s.style?`<div class="why keep">Play style: <b>${s.style}</b></div>`:''}${s.cn?`<div class="why keep">Brings: ${esc(s.cn)}</div>`:''}${teamNotes(s.a,sl)}<div class="s">${s.s?'Support: '+esc(s.s.name):'No support left for this card'}</div>${w?`<div class="why">${esc(w)}</div>`:''}</div>`;}).join('')}</div></div>
     ${t.est?'<p class="orderNote">* = estimated damage</p>':''}`;
     if(t.slots.length<state.size) html+=`<p class="note">Only ${t.slots.length} attacker${t.slots.length===1?'':'s'} available for this team.</p>`;
     html+=`<button class="btn whyBtn" onclick="const c=this.closest('.team');c.classList.toggle('showWhy');this.textContent=c.classList.contains('showWhy')?'Hide reasons':'Why this team?'">Why this team?</button></div>`;

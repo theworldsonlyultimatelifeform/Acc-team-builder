@@ -915,7 +915,10 @@ function baseDmg(e){ // returns [dmg, estimated?]
 }
 function vMult(e){return Math.pow(4,Math.max(0,VARIANTS.indexOf(e.variant)));}
 function trait(e){return TRAITS.find(t=>t.n===e.trait)||TRAITS[0];}
-function effStats(e){const [b,est]=baseDmg(e);const t=trait(e);const m=vMult(e);return {dmg:b*m*(1+t.dmg/100),hp:b*2*m*(1+t.hp/100),est};}
+// Level scaling: level 100 = 2.25x the unlevelled stats (checked on Chosen One and Primal Deity). Other levels assume the same straight line.
+const LEVELS=[0,25,50,75,100,120,150];
+function lvlMult(e){const L=e.level==null?100:+e.level;return 1+L/80;}
+function effStats(e){const [b,est]=baseDmg(e);const t=trait(e);const m=vMult(e)*lvlMult(e);return {dmg:b*m*(1+t.dmg/100),hp:b*2*m*(1+t.hp/100),est};}
 function tierOf(e){if(e.custom)return e.tier;const d=findDb(e);return d?d.t:'';}
 function atkScore(e){const s=effStats(e);const t=tierOf(e);const d=findDb(e);const A=d&&window.AB&&AB[d.n];const raid=A?(.85+A[0]/200):(d&&d.grp===G.RAID&&!TIER_MULT[t]?1.3:1);return Math.sqrt(s.dmg*s.hp)*(TIER_MULT[t]||1)*raid*extraMult(e)*(trait(e).sc||1);}
 function tags(e){const d=findDb(e);return (d&&d.g)||[];}
@@ -1102,6 +1105,7 @@ function openSheet(o){
   }
   html+=`<label>Card picture</label><div class="picEdit"><div id="picBox">${e.img?`<img src="${e.img}" alt="">`:'<div class="pic ph" style="width:72px;height:98px">No picture</div>'}</div><div><input type="file" id="picIn" accept="image/*" style="display:none"><button class="btn" id="picBtn">${e.img?'Change':'Add'} screenshot</button>${e.img?' <button class="btn danger" id="picRm">Remove</button>':''}<div class="mut" style="margin-top:6px">Crop a screenshot of the card from the game.</div></div></div>`;
   html+=`<div id="atkOpts" ${kind==='sup'?'style="display:none"':''}><label>Version</label><div class="chips" id="vChips">${VARIANTS.map(v=>`<button class="chip ${v===e.variant?'on':''}" data-v="${v}"><span class="v v-${v}">${v}</span></button>`).join('')}</div>
+  <label>Level</label><select id="lSel">${LEVELS.map(l=>`<option value="${l}" ${l===(e.level==null?100:+e.level)?'selected':''}>${l?'Level '+l:'Not levelled'}${l>100?' (max for some cards)':''}</option>`).join('')}</select>
   <label>Trait</label><select id="tSel">${TRAITS.map(t=>`<option value="${esc(t.n)}" ${t.n===e.trait?'selected':''}>${esc(t.n)}${t.r?' ('+t.r+')':''}</option>`).join('')}</select>
   <div class="trait-info" id="tInfo"></div></div>
   <div class="row" style="margin-top:18px">${o.entry?'<button class="btn danger" id="rmBtn">Remove</button>':''}<button class="btn" id="cancelBtn" style="margin-left:auto">Cancel</button><button class="btn pri" id="okBtn">${o.entry?'Save':'Add to my cards'}</button></div>`;
@@ -1124,7 +1128,7 @@ function openSheet(o){
       rec={name,kind:$('#cKind').value,tier:$('#cTier').value,custom:true,dmg:dm>0?dm:undefined};
     } else rec={name:d.n,kind:d.kind};
     const k=rec.kind;
-    rec.variant=k==='sup'?'Basic':variant;rec.trait=k==='sup'?'None':$('#tSel').value;rec.img=img||undefined;
+    rec.variant=k==='sup'?'Basic':variant;rec.trait=k==='sup'?'None':$('#tSel').value;if(k!=='sup')rec.level=+$('#lSel').value;rec.img=img||undefined;
     if(o.entry){Object.assign(o.entry,rec);} else {rec.id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);state.owned.push(rec);}
     if(!save()) toast('Phone storage is full. Try a smaller picture.');
     closeSheet();

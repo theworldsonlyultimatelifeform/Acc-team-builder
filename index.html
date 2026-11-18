@@ -921,6 +921,52 @@ const LEVELS=[0,25,50,75,100,120,150];
 function lvlMult(e){const L=e.level==null?100:+e.level;return 1+L/80;}
 function effStats(e){const [b,est]=baseDmg(e);const t=trait(e);const m=vMult(e)*lvlMult(e);return {dmg:b*m*(1+t.dmg/100),hp:b*2*m*(1+t.hp/100),est};}
 function tierOf(e){if(e.custom)return e.tier;const d=findDb(e);return d?d.t:'';}
+// ---------- RANKED META (from the #ranked-team-building chat, Nov 2026) ----------
+// Support ratings by how much top players actually run them. Supports nobody runs in ranked are scored down there.
+const META_TIER={'Lord of Wisdom':'SS','Fear of Future':'SS','Binding Vow':'SS','Defense Force Suit':'S','Will of Fortitude':'S','Will of Conquest':'S','Worthy Arrow':'S',
+ 'Orb of Dominance':'A','Spirit of Water':'A','Reversed Curse Technique':'A','Lighthouse':'A','Spirit of Wind':'A','Slayer Mark':'A','Null Blade':'A','Fairy Protector':'A','Power Rebirth':'A','Spirit of Fire':'A','Binding Light':'A',
+ 'Black Slime':'B'};
+const META_USED=new Set(Object.keys(META_TIER).filter(n=>n!=='Black Slime'));
+DB.forEach(d=>{if(d.kind==='sup'&&META_TIER[d.n])d.t=META_TIER[d.n];});
+// Card → support pairings players run (first one is preferred)
+const META_PAIR={'Awakened Blue Slime':['Lord of Wisdom'],'Blue Slime':['Lord of Wisdom'],'Lost Chariot':['Worthy Arrow'],'Triumphant Chariot':['Worthy Arrow'],
+ 'Golden Petal Mage':['Spirit of Water'],'Shield Hero':['Will of Conquest'],'Soulbound Armor':['Reversed Curse Technique'],'Null':['Lighthouse'],'Awakened Null':['Lighthouse'],
+ 'King of the Tower':['Binding Vow'],'Black Demon':['Fear of Future'],'Awakened Demon Bull':['Fear of Future'],'Limitless Master':['Fear of Future'],'Awakened Limitless Master':['Fear of Future'],'Ascended Limitless Master':['Fear of Future'],
+ 'Heavenly Chaplain':['Null Blade'],'Lunar Inverter':['Null Blade'],'Prideful Warrior':['Orb of Dominance'],'Elf Prodigy':['Spirit of Wind','Fear of Future'],
+ 'Stark Gunner':['Lord of Wisdom'],'Awakened Stark Gunner':['Lord of Wisdom'],'Hero of Ten':['Lord of Wisdom'],'King of Helheim':['Lord of Wisdom','Fear of Future'],
+ 'Secret Puppetmaster':['Orb of Dominance','Binding Vow'],'Fear of Control':['Binding Vow'],'Abyssal Tyrant':['Will of Conquest'],'Monkey Deity':['Will of Conquest'],
+ 'Lion of Justice':['Power Rebirth'],'Ascended Galactic Tyrant':['Will of Conquest'],'Inferno Ghoul':['Spirit of Fire','Binding Vow'],'Flame Diviner':['Binding Vow'],
+ 'Woven Star':['Fear of Future'],'Owl Ghoul Empress':['Fear of Future'],'Fairy Strategist':['Binding Light'],'Fear of Darkness':['Fear of Future'],
+ 'Awakened Soul King':['Orb of Dominance'],'Soul King':['Orb of Dominance'],'Royal Paladin':['Orb of Dominance'],'Bull Vice Captain':['Fear of Future','Defense Force Suit'],
+ 'Star Fist':['Defense Force Suit'],'Awakened Star Fist':['Defense Force Suit']};
+const NOT_FIRST=new Set(['King of Helheim']); // domains / slot-3 cards: never slot 1
+const isDomain=e=>NOT_FIRST.has(e.name)||/\bdomain\b/i.test((findDb(e)||{}).d||'');
+function supByName(n){return supPool().find(x=>x.name===n);}
+// Applies what ranked players do: pairings, Lord of Wisdom on slot 1, no Fear of Future on slot 1,
+// Orb of Dominance only on the team's highest-damage card, domains out of slot 1.
+function metaFix(slots,mode){
+  if(!slots.length)return slots;
+  const ranked=!!mode.ranked,n=slots.length;
+  // domains out of slot 1
+  if(ranked&&n>1&&isDomain(slots[0].a)){const j=slots.findIndex(p=>!isDomain(p.a));if(j>0){const t=slots[0];slots[0]=slots[j];slots[j]=t;}}
+  const held=()=>new Set(slots.map(p=>p.s&&p.s.name).filter(Boolean));
+  const fresh=(bad)=>{const h=held();return supPool().filter(s=>!h.has(s.name)&&!SUP_ZERO.has(s.name)&&!(bad&&bad(s))&&!tags(s).includes('fall')).sort((a,b)=>supScore(b,mode)-supScore(a,mode))[0]||null;};
+  const give=(p,name)=>{const o=slots.find(q=>q!==p&&q.s&&q.s.name===name);const s=(o&&o.s)||supByName(name);if(!s)return;if(o){o.s=p.s;}p.s=s;};
+  // 1. pairings (signature supports stay)
+  slots.forEach(p=>{const sn=SIG()[p.a.name];if(sn)return;const want=META_PAIR[p.a.name];if(!want)return;
+    const w=want.find(x=>!(x==='Fear of Future'&&p===slots[0])&&!slots.some(q=>q!==p&&q.s&&q.s.name===x&&META_PAIR[q.a.name]&&META_PAIR[q.a.name].includes(x)));if(w&&(!p.s||p.s.name!==w))give(p,w);});
+  const paired=p=>p.s&&((META_PAIR[p.a.name]||[]).includes(p.s.name)||SIG()[p.a.name]===p.s.name);
+  // 2. Orb of Dominance only on the highest-damage card (it does nothing if the enemy hits harder)
+  const dm=p=>(p.st||effStats(p.a)).dmg;const top=slots.reduce((x,y)=>dm(y)>dm(x)?y:x);
+  slots.forEach(p=>{if(p.s&&p.s.name==='Orb of Dominance'&&p!==top&&!paired(p)){p.s=fresh(s=>s.name==='Orb of Dominance');}});
+  // 3. Fear of Future is wasted on slot 1
+  const s0=slots[0];if(s0.s&&s0.s.name==='Fear of Future'){const j=slots.findIndex((p,i)=>i>0&&!paired(p));if(j>0){const t=s0.s;s0.s=slots[j].s;slots[j].s=t;}else s0.s=fresh(s=>s.name==='Fear of Future');}
+  // 4. Ranked: Lord of Wisdom on slot 1 (stuns, freezes and Jahad are how most ranked cards die)
+  if(ranked&&!paired(s0)&&!(s0.s&&s0.s.name==='Lord of Wisdom')){const o=slots.find(q=>q.s&&q.s.name==='Lord of Wisdom');if(o&&paired(o)){}else give(s0,'Lord of Wisdom');}
+  // anything left empty or still on Orb/FoF where it shouldn't be gets the next best support
+  slots.forEach(p=>{if(!p.s)p.s=fresh();});
+  return slots;
+}
 // Signature supports: a support that says "Stronger with X", or a card that transforms "Paired with"/"With" a support
 let _SIG=null;function SIG(){if(_SIG)return _SIG;_SIG={};const atk=new Set(DB.filter(d=>d.kind==='atk').map(d=>d.n)),sup=new Set(DB.filter(d=>d.kind==='sup').map(d=>d.n));
  DB.filter(d=>d.kind==='sup'&&d.d).forEach(d=>{const m=d.d.match(/Stronger with (?:an? )?(.+?)\.(?:\s|$)/);if(!m)return;m[1].split(/,\s*|\s+or\s+/).map(x=>x.replace(/^(the|a|an)\s+/i,'').trim()).forEach(n=>{if(atk.has(n)&&!_SIG[n])_SIG[n]=d.n;});});
@@ -1206,6 +1252,7 @@ const MODES=[
 function supScore(e,mode){
   if(SUP_ZERO.has(e.name))return 0.01;let s=e.custom?(SUP_SCORE[e.tier]??30):(SUP_SCORE[tierOf(e)]??30);
   tags(e).forEach(g=>{if(g in mode.sup)s*=mode.sup[g];});
+  if(mode.ranked&&!e.custom&&!META_USED.has(e.name))s*=.6;
   return s;
 }
 function buildTeam(mode,used){
@@ -1224,7 +1271,7 @@ function buildTeam(mode,used){
   const spool=[...surv,...rest,...fall];
   pairs.forEach(p=>{if(!p.s&&spool.length)p.s=spool.shift();});
   const isFall=p=>p.s&&tags(p.s).includes('fall');
-  const slots=[...pairs.filter(isFall),...pairs.filter(p=>!isFall(p))];
+  const slots=metaFix([...pairs.filter(isFall),...pairs.filter(p=>!isFall(p))],mode);
   let dmg=0,hp=0,est=false;pairs.forEach(p=>{const s=p.st||effStats(p.a);dmg+=s.dmg;hp+=s.hp;est=est||!!s.est;});
   return {slots,dmg,hp,est};
 }
@@ -1247,8 +1294,8 @@ function animeOf(e){const d=findDb(e);return d&&d.kind==='atk'&&d.a?d.a:'';}
 // What each card can do, read from its ability text
 const CAPS={
  dis:['shuts down abilities',/disabl|\bseal|negates? enemy support|cancels enemy abilit|lose their ability|abilities and supports|can.t act/],
- antirev:['stops revives',/can.t revive|cannot revive|block\w* (enemy )?(heals? or )?revive|revives? .{0,20}blocked|kills .{0,20}can.t revive/],
- antiheal:['stops healing',/can.t heal|no healing|cannot heal|block\w* (enemy )?heal|nullif\w* (enemy )?heal|halves its healing|steal\w* .{0,20}heal/],
+ antirev:['stops revives',/can.t revive|cannot revive|block\w* (enemy )?(heals? or )?revive|revives? .{0,20}blocked|kills .{0,20}can.t revive|heals \(\d+ times\) or revives/],
+ antiheal:['stops healing',/can.t heal|no healing|cannot heal|block\w* (enemy )?heal|nullif\w* (enemy )?heal|halves its healing|steal\w* .{0,20}heal|block enemy heals/],
  exe:['executes',/execut|instantly defeat|cut down instantly|struck down|clawed instantly|devours? enemies at 0/],
  prot:['protects off-field allies',/off-field all|damage to off-field|protects? off-field|take hits (meant )?for allies|redirects? \d+% of damage dealt to allies|intercept/],
  dr:['damage reduction',/damage reduction|less damage|absorbs? \d+% of (damage|incoming)|shield|barrier|caps incoming|takes? \d+% less/],
@@ -1303,10 +1350,21 @@ function buildCounter(mode,used){
     const s=sg||(i===0&&ranked.find(x=>ok(x)&&tags(x).includes('surv')))||ranked.find(ok);
     if(s){p.s=s;taken.add(s.name);capsOf(findDb(s)).forEach(k=>{if(k in need)covered[k]=1;});}
   });
+  pairs=metaFix(pairs,mode);
+  // Princess of Light blocks heals (12x) and revives (4x) on or off the field: the hardest revive/heal counter. Always last.
+  let tip='';const tgt=mode.id==='counter'?capsOf(DB.find(x=>x.n===(state.target||'Divine Emperor')&&x.kind==='atk')):new Set();
+  if(mode.id==='antirev'||tgt.has('revive')||tgt.has('heal')){
+    let i=pairs.findIndex(p=>p.a.name==='Princess of Light');
+    if(i<0){const pol=pool().find(e=>e.kind==='atk'&&e.name==='Princess of Light'&&!used.has(e.id));
+      if(pol&&pairs.length){let w=-1,wv=1e99;pairs.forEach((p,k)=>{if(k===0&&pairs.length>1)return;const v=atkScore(p.a);if(v<wv){wv=v;w=k;}});if(w>=0){pairs[w].a=pol;i=w;}}
+      else if(!pol)tip='Princess of Light is the best answer to revives and heals. Put her in your last slot once you have her.';}
+    if(i>=0&&i!==pairs.length-1){const [x]=pairs.splice(i,1);pairs.push(x);}
+  }
   pairs.forEach(p=>{const c=new Set([...capsOf(findDb(p.a)),...(p.s?capsOf(findDb(p.s)):[])]);const l=Object.keys(need).filter(k=>c.has(k)).map(k=>CAPS[k][0]);p.cn=l.join(', ');});
   let dmg=0,hp=0,est=false;pairs.forEach(p=>{const s=effStats(p.a);dmg+=s.dmg;hp+=s.hp;est=est||!!s.est;});
+  pairs.forEach(p=>[...capsOf(findDb(p.a)),...(p.s?capsOf(findDb(p.s)):[])].forEach(k=>{if(k in need)covered[k]=1;}));
   const missing=Object.keys(need).filter(k=>need[k]>=1.5&&!covered[k]).map(k=>CAPS[k][0]);
-  return {slots:pairs,dmg,hp,est,missing};
+  return {slots:pairs,dmg,hp,est,missing,tip};
 }
 function targetPicker(){
   const list=DB.filter(d=>d.kind==='atk'&&!d.bo&&d.d).sort((a,b)=>a.n.localeCompare(b.n));
@@ -1326,7 +1384,7 @@ function renderTeams(){
     const t=m.counter?buildCounter(m,used):buildTeam(m,used);results[m.id]=t;
     if(state.mode&&state.mode!=='all'&&m.id!==state.mode)return;
     if(m.id==='backup'&&!t.slots.length){html+=`<div class="card team"><h3>${m.name}</h3><p class="mut" style="margin:0">Add more attackers to get a second team.</p></div>`;return;}
-    html+=`<div class="card team"><h3>${m.name}</h3><p class="stats" style="margin:0 0 4px">Team <b>DMG ${fmt(t.dmg)}</b> · <b>HP ${fmt(t.hp)}</b>${t.est?' <span class="est">includes est.</span>':''}</p><p class="mut" style="margin:0 0 6px">${m.desc}</p>${m.id==='counter'?targetPicker():''}${skipNote(m)}${t.missing&&t.missing.length?`<p class="note" style="margin:0 0 6px">Your cards can’t cover: ${esc(t.missing.join(', '))}.</p>`:''}`;
+    html+=`<div class="card team"><h3>${m.name}</h3><p class="stats" style="margin:0 0 4px">Team <b>DMG ${fmt(t.dmg)}</b> · <b>HP ${fmt(t.hp)}</b>${t.est?' <span class="est">includes est.</span>':''}</p><p class="mut" style="margin:0 0 6px">${m.desc}</p>${m.id==='counter'?targetPicker():''}${skipNote(m)}${t.tip?`<p class="note" style="margin:0 0 6px">${esc(t.tip)}</p>`:''}${t.missing&&t.missing.length?`<p class="note" style="margin:0 0 6px">Your cards can’t cover: ${esc(t.missing.join(', '))}.</p>`:''}`;
     const sl=t.slots;
     html+=`<div class="deckWrap"><div class="deck"><div class="deckCol sup"><div class="deckHd">Support</div>${sl.map(s=>tile(s.s,null,s.s?(tierOf(s.s)||''):'')).join('')}</div><div class="deckCol atk"><div class="deckHd">Attack</div>${sl.map((s,i)=>{const st=s.st||effStats(s.a);return tile(s.a,i+1,fmt(st.dmg)+(st.est?'*':''));}).join('')}</div></div>
     <div class="deckInfo">${sl.map((s,i)=>{const an=animeOf(s.a),w=whyFor(s.s,i);return `<div class="di"><div class="t">${i+1}. ${label(s.a)}</div>${an?`<div class="an">${esc(an)}</div>`:''}${s.style?`<div class="why keep">Play style: <b>${s.style}</b></div>`:''}${s.cn?`<div class="why keep">Brings: ${esc(s.cn)}</div>`:''}${teamNotes(s.a,sl)}<div class="s">${s.s?'Support: '+esc(s.s.name):'No support left for this card'}</div>${w?`<div class="why">${esc(w)}</div>`:''}</div>`;}).join('')}</div></div>
